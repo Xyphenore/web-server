@@ -5,4 +5,5 @@ pub use self::request::Request;
 mod handler;
 mod http_method;
 mod request;
+mod status;
 mod version;
