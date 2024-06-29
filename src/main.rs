@@ -18,10 +18,11 @@ fn main() {
         listener.local_addr().unwrap()
     );
 
-    let mut handler = RequestHandler::new();
-    if DEBUG {
-        handler = RequestHandler::new_with_debug();
-    }
+    let mut handler = if DEBUG {
+        RequestHandler::new_with_debug()
+    } else {
+        RequestHandler::new()
+    };
 
     handler.add_listener(HTTPMethod::GET("/".to_string()), get_index);
 
