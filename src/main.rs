@@ -12,7 +12,7 @@ fn main() {
 
         println!(
             "Connection established with: {}",
-            stream.peer_addr().unwrap()
+            stream.peer_addr().unwrap(),
         );
     }
 }
