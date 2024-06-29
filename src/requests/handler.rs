@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::fs;
 use std::io::{BufRead, BufReader, Write};
 use std::net::TcpStream;
 
@@ -84,6 +85,11 @@ impl RequestHandler {
         let version = request.version;
         let code = "404 NOT FOUND";
 
-        format!("{version} {code}\r\n\r\n")
+        let response_header = format!("{version} {code}");
+
+        let response_body = fs::read_to_string("templates/not_found.html").unwrap();
+        let length = response_body.len();
+
+        format!("{response_header}\r\nContent-Length: {length}\r\n\r\n{response_body}")
     }
 }
