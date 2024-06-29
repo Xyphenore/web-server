@@ -5,7 +5,7 @@ use std::net::TcpListener;
 fn main() {
     let listener = TcpListener::bind("127.0.0.1:8000").unwrap();
 
-    println!("Server started, waiting incoming connections.");
+    println!("Server started and waiting for incoming connections.");
 
     for stream in listener.incoming() {
         let stream = stream.unwrap();
