@@ -13,7 +13,10 @@ static DEBUG: bool = false;
 fn main() {
     let listener = TcpListener::bind("127.0.0.1:8000").unwrap();
 
-    println!("Server started and waiting for incoming connections.");
+    println!(
+        "Server started and waiting for incoming connections on {}.",
+        listener.local_addr().unwrap()
+    );
 
     let mut handler = RequestHandler::new();
     if DEBUG {
