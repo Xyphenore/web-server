@@ -24,6 +24,3 @@ maintenance = { status = "deprecated" }
 [dev-dependencies]
 
 [build-dependencies]
-
-[lints.rust]
-unsafe_code = "forbid"
