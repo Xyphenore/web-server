@@ -3,7 +3,6 @@ use std::fs;
 use crate::requests::Request;
 
 pub fn get(request: Request) -> String {
-    println!("Test");
     let version = request.version;
 
     let code = "200 OK";
