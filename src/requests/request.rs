@@ -1,6 +1,8 @@
+use super::{Method, Version};
+
+#[derive(Debug, Clone, Hash)]
 pub struct Request {
-    pub method: String,
-    pub uri: String,
-    pub version: String,
+    pub method: Method,
+    pub version: &'static Version,
     pub other_lines: Vec<String>,
 }
