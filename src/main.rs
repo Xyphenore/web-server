@@ -2,7 +2,7 @@
 
 use std::net::TcpListener;
 
-use crate::requests::{HTTPMethod, RequestHandler};
+use crate::requests::{Method, RequestHandler};
 use crate::routes::index::get as get_index;
 
 mod requests;
@@ -24,7 +24,7 @@ fn main() {
         RequestHandler::new()
     };
 
-    handler.add_listener(HTTPMethod::GET("/".to_string()), get_index);
+    handler.add_listener(Method::get("/").unwrap(), get_index);
 
     for stream in listener.incoming() {
         handler.handle(stream.unwrap());

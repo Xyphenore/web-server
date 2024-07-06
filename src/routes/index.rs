@@ -1,16 +1,12 @@
-use std::fs;
+use std::path::Path;
 
-use crate::requests::Request;
+use crate::requests::{Request, Response, Status};
 
-pub fn get(request: Request) -> String {
-    let version = request.version;
+pub fn get(request: Request) -> Response {
+    let mut response = Response::new(request.version, Status::OK);
+    response
+        .add_file(Path::new("templates/index.html"))
+        .unwrap();
 
-    let code = "200 OK";
-
-    let response_header = format!("{version} {code}");
-
-    let response_body = fs::read_to_string("templates/index.html").unwrap();
-    let length = response_body.len();
-
-    format!("{response_header}\r\nContent-Length: {length}\r\n\r\n{response_body}")
+    response
 }
