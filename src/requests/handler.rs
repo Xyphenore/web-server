@@ -82,10 +82,12 @@ impl RequestHandler {
             .clone();
 
         if self.workers.is_any_available() {
-            let res = self.workers.execute(move || {
-                let response = listener(request);
-                stream.write_all(response.to_string().as_bytes()).unwrap();
-            });
+            self.workers
+                .execute(move || {
+                    let response = listener(request);
+                    stream.write_all(response.to_string().as_bytes()).unwrap();
+                })
+                .unwrap();
         } else {
             let response = Self::service_unavailable(request);
             stream.write_all(response.to_string().as_bytes()).unwrap();
