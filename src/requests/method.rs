@@ -14,31 +14,31 @@ impl Display for Method {
 
 impl Method {
     pub fn get(uri: impl AsRef<str>) -> Result<Self, InvalidURIError> {
-        Self::new("GET", uri)
+        Self::build("GET", uri)
     }
     pub fn post(uri: impl AsRef<str>) -> Result<Self, InvalidURIError> {
-        Self::new("POST", uri)
+        Self::build("POST", uri)
     }
     pub fn update(uri: impl AsRef<str>) -> Result<Self, InvalidURIError> {
-        Self::new("UPDATE", uri)
+        Self::build("UPDATE", uri)
     }
     pub fn patch(uri: impl AsRef<str>) -> Result<Self, InvalidURIError> {
-        Self::new("PATCH", uri)
+        Self::build("PATCH", uri)
     }
     pub fn delete(uri: impl AsRef<str>) -> Result<Self, InvalidURIError> {
-        Self::new("DELETE", uri)
+        Self::build("DELETE", uri)
     }
     pub fn head(uri: impl AsRef<str>) -> Result<Self, InvalidURIError> {
-        Self::new("HEAD", uri)
+        Self::build("HEAD", uri)
     }
     pub fn options(uri: impl AsRef<str>) -> Result<Self, InvalidURIError> {
-        Self::new("OPTIONS", uri)
+        Self::build("OPTIONS", uri)
     }
     pub fn connect(uri: impl AsRef<str>) -> Result<Self, InvalidURIError> {
-        Self::new("CONNECT", uri)
+        Self::build("CONNECT", uri)
     }
     pub fn trace(uri: impl AsRef<str>) -> Result<Self, InvalidURIError> {
-        Self::new("TRACE", uri)
+        Self::build("TRACE", uri)
     }
 
     /// Create a new instance from the line
@@ -81,7 +81,7 @@ impl Method {
     const ALLOWED_METHODS: &'static [&'static str] = &[
         "GET", "UPDATE", "POST", "DELETE", "PATCH", "HEAD", "OPTIONS", "CONNECT", "TRACE",
     ];
-    fn new(method: impl AsRef<str>, uri: impl AsRef<str>) -> Result<Self, InvalidURIError> {
+    fn build(method: impl AsRef<str>, uri: impl AsRef<str>) -> Result<Self, InvalidURIError> {
         let method = method.as_ref();
         let uri = uri.as_ref();
 
