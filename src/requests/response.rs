@@ -1,6 +1,5 @@
 use std::fmt::{Display, Formatter};
 use std::fs;
-use std::ops::Deref;
 use std::path::Path;
 
 use super::{Status, Version};
@@ -34,10 +33,10 @@ impl Response {
         }
     }
 
-    pub fn add_file(&mut self, path: impl AsRef<Path>) -> Result<&Self, std::io::Error> {
+    pub fn add_file(&mut self, path: impl AsRef<Path>) -> Result<&mut Self, std::io::Error> {
         fs::read_to_string(path.as_ref()).and_then(|contents| {
-            self.contents += &contents;
-            Ok(self.deref())
+            self.contents += &contents.to_owned();
+            Ok(self)
         })
     }
 }

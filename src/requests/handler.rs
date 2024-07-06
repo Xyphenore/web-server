@@ -38,7 +38,7 @@ impl RequestHandler {
         self.listeners.insert(method, listener);
     }
 
-    fn remove_listener(&mut self, method: Method) {
+    pub fn remove_listener(&mut self, method: Method) {
         if self.listeners.remove(&method) == None {
             panic!("Any listener is registered for {}", method)
         }

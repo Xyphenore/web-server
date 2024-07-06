@@ -1,5 +1,4 @@
 use std::fmt::{Debug, Display, Formatter};
-use std::io::BufRead;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Method {
@@ -15,31 +14,31 @@ impl Display for Method {
 
 impl Method {
     pub fn get(uri: impl AsRef<str>) -> Result<Self, InvalidURIError> {
-        Self::new(uri, "GET", Panic::True)
+        Self::new("GET", uri)
     }
     pub fn post(uri: impl AsRef<str>) -> Result<Self, InvalidURIError> {
-        Self::new(uri, "POST", Panic::True)
+        Self::new("POST", uri)
     }
     pub fn update(uri: impl AsRef<str>) -> Result<Self, InvalidURIError> {
-        Self::new(uri, "UPDATE", Panic::True)
+        Self::new("UPDATE", uri)
     }
     pub fn patch(uri: impl AsRef<str>) -> Result<Self, InvalidURIError> {
-        Self::new(uri, "PATCH", Panic::True)
+        Self::new("PATCH", uri)
     }
     pub fn delete(uri: impl AsRef<str>) -> Result<Self, InvalidURIError> {
-        Self::new(uri, "DELETE", Panic::True)
+        Self::new("DELETE", uri)
     }
     pub fn head(uri: impl AsRef<str>) -> Result<Self, InvalidURIError> {
-        Self::new(uri, "HEAD", Panic::True)
+        Self::new("HEAD", uri)
     }
     pub fn options(uri: impl AsRef<str>) -> Result<Self, InvalidURIError> {
-        Self::new(uri, "OPTIONS", Panic::True)
+        Self::new("OPTIONS", uri)
     }
     pub fn connect(uri: impl AsRef<str>) -> Result<Self, InvalidURIError> {
-        Self::new(uri, "CONNECT", Panic::True)
+        Self::new("CONNECT", uri)
     }
     pub fn trace(uri: impl AsRef<str>) -> Result<Self, InvalidURIError> {
-        Self::new(uri, "TRACE", Panic::True)
+        Self::new("TRACE", uri)
     }
 
     /// Create a new instance from the line
@@ -58,41 +57,46 @@ impl Method {
     /// let method = Method::from_line("NOT /");
     /// assert!(method.is_err());
     /// ```
-    pub fn from_line(line: impl AsRef<str>) -> Result<Self, dyn InvalidMethodPartError> {
-        let parts = line.as_ref().split(" ").collect();
-        Self::new(parts[0], parts[1], Panic::False)
-    }
+    pub fn from_line(line: impl AsRef<str>) -> Result<Self, Box<dyn InvalidMethodPartError>> {
+        let parts: Vec<_> = line.as_ref().split(" ").collect();
+        let method = parts[0];
+        let uri = parts[1];
 
-    const ALLOWED_METHODS: Vec<&'static str> = vec![
-        "GET", "UPDATE", "POST", "DELETE", "PATCH", "HEAD", "OPTIONS", "CONNECT", "TRACE",
-    ];
-    fn new(
-        uri: impl AsRef<str>,
-        method: impl AsRef<str>,
-        panic: Panic,
-    ) -> Result<Self, dyn InvalidMethodPartError> {
-        Self::check_method(method.as_ref())
-            .or_else(|error| {
-                if panic == Panic::True {
-                    panic!("The method {} is not allowed.", method);
-                }
-
-                Err(error)
-            })
-            .map_err(|error| -> dyn InvalidMethodPartError { Err(error) })
-            .and(Self::check_uri(uri.as_ref()))
+        Self::check_method(method)
+            .map_err(|error| -> Box<dyn InvalidMethodPartError> { Box::new(error) })
+            .and(
+                Self::check_uri(uri)
+                    .map_err(|error| -> Box<dyn InvalidMethodPartError> { Box::new(error) }),
+            )
             .and(Ok(Self {
-                method: method.as_ref().to_uppercase(),
-                uri: uri.as_ref().to_string(),
+                method: method.to_uppercase(),
+                uri: uri.to_string(),
             }))
     }
 
     pub fn convert(method: impl AsRef<str>, uri: impl AsRef<str>) -> String {
-        method.as_ref().to_uppercase() + "_" + uri
+        method.as_ref().to_uppercase() + "_" + uri.as_ref()
+    }
+
+    const ALLOWED_METHODS: &'static [&'static str] = &[
+        "GET", "UPDATE", "POST", "DELETE", "PATCH", "HEAD", "OPTIONS", "CONNECT", "TRACE",
+    ];
+    fn new(method: impl AsRef<str>, uri: impl AsRef<str>) -> Result<Self, InvalidURIError> {
+        let method = method.as_ref();
+        let uri = uri.as_ref();
+
+        Self::check_method(method)
+            .or_else(|_| panic!("The method {} is not allowed.", method))
+            .and(Self::check_uri(uri))
+            .and(Ok(Self {
+                method: method.to_uppercase(),
+                uri: uri.to_string(),
+            }))
     }
 
     fn check_uri(uri: impl AsRef<str>) -> Result<(), InvalidURIError> {
-        if uri.as_ref().trim().is_empty() {
+        let uri = uri.as_ref();
+        if uri.trim().is_empty() {
             return Err(InvalidURIError::new(uri));
         }
 
@@ -100,6 +104,7 @@ impl Method {
     }
 
     fn check_method(method: impl AsRef<str>) -> Result<(), InvalidMethodError> {
+        let method = method.as_ref();
         if !Self::ALLOWED_METHODS.contains(&method) {
             return Err(InvalidMethodError::new(method));
         }
@@ -108,16 +113,10 @@ impl Method {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
-enum Panic {
-    True,
-    False,
-}
-
-trait InvalidMethodPartError: Debug + Clone {}
+pub trait InvalidMethodPartError: Debug {}
 
 #[derive(Debug, Clone)]
-struct InvalidURIError {
+pub struct InvalidURIError {
     entry: String,
 }
 
@@ -138,7 +137,7 @@ impl InvalidURIError {
 impl InvalidMethodPartError for InvalidURIError {}
 
 #[derive(Debug, Clone)]
-struct InvalidMethodError {
+pub struct InvalidMethodError {
     entry: String,
 }
 

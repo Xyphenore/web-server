@@ -1,12 +1,11 @@
 use std::cmp::Ordering;
 use std::fmt::{Debug, Display, Formatter};
-use std::ops::Deref;
 use std::string::ToString;
 
 #[derive(Debug, Clone, Hash)]
 pub struct Status {
     code: u16,
-    name: String,
+    name: &'static str,
 }
 
 impl PartialOrd for Status {
@@ -50,19 +49,16 @@ impl Display for Status {
 impl Status {
     pub const OK: &'static Self = &Self {
         code: 200,
-        name: "OK".to_string(),
+        name: "OK",
     };
     pub const NOT_FOUND: &'static Self = &Self {
         code: 404,
-        name: "NOT FOUND".to_string(),
+        name: "NOT FOUND",
     };
     pub const INTERNAL_ERROR: &'static Self = &Self {
         code: 500,
-        name: "INTERNAL ERROR".to_string(),
+        name: "INTERNAL ERROR",
     };
-
-    const ALLOWED_STATUS: Vec<&'static Self> =
-        vec![&Self::OK, &Self::NOT_FOUND, &Self::INTERNAL_ERROR];
 
     /// Get a reference to a defined constant status from a line of HTTP request.
     ///
@@ -90,7 +86,7 @@ impl Status {
         Self::ALLOWED_STATUS
             .iter()
             .find(|status| status.to_string() == upper_line)
-            .and_then(|status| Some(status.deref()))
+            .and_then(|status| Some(*status))
             .ok_or(InvalidHTTPFullNameStatusError::new(line))
     }
 
@@ -114,7 +110,7 @@ impl Status {
         Self::ALLOWED_STATUS
             .iter()
             .find(|status| status.code == code)
-            .and_then(|status| Some(status.deref()))
+            .and_then(|status| Some(*status))
             .ok_or(InvalidHTTPCodeStatusError::new(code.to_string()))
     }
 
@@ -140,25 +136,28 @@ impl Status {
         Self::ALLOWED_STATUS
             .iter()
             .find(|status| upper_name == status.name)
-            .and_then(|status| Some(status.deref()))
+            .and_then(|status| Some(*status))
             .ok_or(InvalidHTTPNameStatusError::new(name))
     }
+
+    const ALLOWED_STATUS: &'static [&'static Self] =
+        &[Self::OK, Self::NOT_FOUND, Self::INTERNAL_ERROR];
 }
 
-trait InvalidHTTPStatusError: Debug + Clone {}
+pub trait InvalidHTTPStatusError: Debug + Clone {}
 
 #[derive(Debug, Clone)]
-struct InvalidHTTPFullNameStatusError {
+pub struct InvalidHTTPFullNameStatusError {
     entry: String,
 }
 
 #[derive(Debug, Clone)]
-struct InvalidHTTPCodeStatusError {
+pub struct InvalidHTTPCodeStatusError {
     entry: String,
 }
 
 #[derive(Debug, Clone)]
-struct InvalidHTTPNameStatusError {
+pub struct InvalidHTTPNameStatusError {
     entry: String,
 }
 
