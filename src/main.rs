@@ -4,6 +4,7 @@ use std::net::TcpListener;
 
 use crate::requests::{Method, RequestHandler};
 use crate::routes::index::get as get_index;
+use crate::routes::slow_request::get as get_slow_request;
 
 mod requests;
 mod routes;
@@ -25,6 +26,7 @@ fn main() {
     };
 
     handler.add_listener(Method::get("/").unwrap(), get_index);
+    handler.add_listener(Method::get("/slow_request").unwrap(), get_slow_request);
 
     for stream in listener.incoming() {
         handler.handle(stream.unwrap());
