@@ -1,9 +1,9 @@
 pub use self::handler::RequestHandler;
-pub use self::http_method::HTTPMethod;
+pub use self::method::Method;
 pub use self::request::Request;
 
 mod handler;
-mod http_method;
+mod method;
 mod request;
 mod status;
 mod version;
