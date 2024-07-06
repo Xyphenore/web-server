@@ -1,7 +1,7 @@
 use std::cmp::Ordering;
 use std::fmt::{Debug, Display, Formatter};
 
-#[derive(Debug, Clone, Hash)]
+#[derive(Debug, Clone)]
 pub struct Status {
     code: u16,
     name: &'static str,
@@ -32,10 +32,6 @@ impl PartialOrd for Status {
 impl PartialEq for Status {
     fn eq(&self, other: &Self) -> bool {
         self.code == other.code
-    }
-
-    fn ne(&self, other: &Self) -> bool {
-        self.code != other.code
     }
 }
 

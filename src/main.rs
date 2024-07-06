@@ -13,7 +13,7 @@ mod threads;
 static DEBUG: bool = false;
 
 fn main() {
-    WebServer::new(5, if DEBUG { Debug::True } else { Debug::False })
+    WebServer::new(2, if DEBUG { Debug::True } else { Debug::False }, 2)
         .add_listener(Method::get("/").unwrap(), get_index)
         .add_listener(Method::get("/slow_request").unwrap(), get_slow_request)
         .serve();

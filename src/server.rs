@@ -1,3 +1,4 @@
+use std::io;
 use std::net::TcpListener;
 
 use crate::requests::{Debug, HTTPListener, Method, RequestHandler};
@@ -7,9 +8,9 @@ pub struct WebServer {
 }
 
 impl WebServer {
-    pub fn new(amount_threads: usize, debug: Debug) -> Self {
+    pub fn new(amount_threads: usize, debug: Debug, waiting_job_limit: usize) -> Self {
         Self {
-            handler: RequestHandler::new(amount_threads, debug),
+            handler: RequestHandler::new(amount_threads, debug, waiting_job_limit),
         }
     }
 
@@ -20,6 +21,9 @@ impl WebServer {
 
     pub fn serve(&mut self) {
         let listener = TcpListener::bind("127.0.0.1:8000").unwrap();
+        listener
+            .set_nonblocking(true)
+            .expect("Cannot make the TCP listener to non-blocking mode.");
 
         println!(
             "Server started and waiting for incoming connections on {}.",
@@ -27,11 +31,20 @@ impl WebServer {
         );
 
         loop {
-            listener
-                .accept()
-                .and_then(|stream| Ok(self.handler.handle(stream.0)))
-                .unwrap();
-            self.handler.process_waiting_request();
+            let stream = listener.accept();
+
+            match stream {
+                Err(ref e) if e.kind() == io::ErrorKind::WouldBlock => {}
+                Ok((stream, _)) => {
+                    stream
+                        .set_nonblocking(false)
+                        .expect("Cannot make the TCP stream to blocking mode.");
+                    self.handler.handle(stream);
+                }
+                Err(error) => panic!("encountered IO error: {}", error),
+            }
+
+            self.handler.process_waiting_requests();
         }
     }
 }

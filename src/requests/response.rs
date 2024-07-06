@@ -1,14 +1,17 @@
 use std::fmt::{Display, Formatter};
 use std::fs;
+use std::io::Write;
+use std::net::TcpStream;
 use std::path::Path;
 
 use super::{Status, Version};
 
-#[derive(Debug, Clone, PartialEq, PartialOrd, Hash)]
+#[derive(Debug)]
 pub struct Response {
     version: &'static Version,
     status: &'static Status,
     contents: String,
+    stream: TcpStream,
 }
 
 impl Display for Response {
@@ -25,18 +28,23 @@ impl Display for Response {
 }
 
 impl Response {
-    pub fn new(version: &'static Version, status: &'static Status) -> Response {
-        Response {
+    pub fn new(version: &'static Version, status: &'static Status, stream: TcpStream) -> Self {
+        Self {
             version,
             contents: String::new(),
             status,
+            stream,
         }
     }
 
     pub fn add_file(&mut self, path: impl AsRef<Path>) -> Result<&mut Self, std::io::Error> {
-        fs::read_to_string(path.as_ref()).and_then(|contents| {
+        fs::read_to_string(path.as_ref()).map(|contents| {
             self.contents += &contents.to_owned();
-            Ok(self)
+            self
         })
+    }
+
+    pub fn send(&mut self) {
+        self.stream.write_all(self.to_string().as_bytes()).unwrap()
     }
 }

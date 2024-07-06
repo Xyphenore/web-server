@@ -58,7 +58,7 @@ impl Method {
     /// assert!(method.is_err());
     /// ```
     pub fn from_line(line: impl AsRef<str>) -> Result<Self, Box<dyn InvalidMethodPartError>> {
-        let parts: Vec<_> = line.as_ref().split(" ").collect();
+        let parts: Vec<_> = line.as_ref().split(' ').collect();
         let method = parts[0];
         let uri = parts[1];
 
@@ -86,7 +86,7 @@ impl Method {
         let uri = uri.as_ref();
 
         Self::check_method(method)
-            .or_else(|_| panic!("The method {} is not allowed.", method))
+            .map_err(|_| panic!("The method {} is not allowed.", method))
             .and(Self::check_uri(uri))
             .and(Ok(Self {
                 method: method.to_uppercase(),

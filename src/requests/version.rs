@@ -65,7 +65,7 @@ impl Version {
         Self::ALLOWED_VERSIONS
             .iter()
             .find(|version| version.to_string() == upper_line)
-            .and_then(|version| Some(*version))
+            .copied()
             .ok_or(InvalidHTTPVersionError::new(line))
     }
 }
