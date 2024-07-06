@@ -3,30 +3,33 @@ use std::io::{BufRead, BufReader, Write};
 use std::net::TcpStream;
 use std::path::Path;
 
+use crate::threads::WorkerPool;
+
 use super::{Method, Request, Response, Status, Version};
 
 type HTTPListener = fn(Request) -> Response;
 
+#[derive(Debug)]
 pub struct RequestHandler {
-    cpt: u32,
+    cpt: usize,
     debug: bool,
     listeners: HashMap<Method, HTTPListener>,
+    workers: WorkerPool,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum Debug {
+    True,
+    False,
 }
 
 impl RequestHandler {
-    pub fn new() -> RequestHandler {
+    pub fn new(amount_threads: usize, debug: Debug) -> RequestHandler {
         RequestHandler {
             cpt: 0,
-            debug: false,
+            debug: debug == Debug::True,
             listeners: HashMap::new(),
-        }
-    }
-
-    pub fn new_with_debug() -> RequestHandler {
-        RequestHandler {
-            cpt: 0,
-            debug: true,
-            listeners: HashMap::new(),
+            workers: WorkerPool::new(amount_threads),
         }
     }
 
@@ -75,16 +78,33 @@ impl RequestHandler {
         let listener = self
             .listeners
             .get(&request.method)
-            .unwrap_or(&(RequestHandler::not_found_handler as HTTPListener));
+            .unwrap_or(&(RequestHandler::not_found_handler as HTTPListener))
+            .clone();
 
-        let response = listener(request);
-        stream.write_all(response.to_string().as_bytes()).unwrap();
+        if self.workers.is_any_available() {
+            let res = self.workers.execute(move || {
+                let response = listener(request);
+                stream.write_all(response.to_string().as_bytes()).unwrap();
+            });
+        } else {
+            let response = Self::service_unavailable(request);
+            stream.write_all(response.to_string().as_bytes()).unwrap();
+        }
     }
 
     fn not_found_handler(request: Request) -> Response {
         let mut response = Response::new(request.version, Status::NOT_FOUND);
         response
             .add_file(Path::new("templates/not_found.html"))
+            .unwrap();
+
+        response
+    }
+
+    fn service_unavailable(request: Request) -> Response {
+        let mut response = Response::new(request.version, Status::SERVICE_UNAVAILABLE);
+        response
+            .add_file(Path::new("templates/service_unavailable.html"))
             .unwrap();
 
         response

@@ -59,6 +59,10 @@ impl Status {
         code: 500,
         name: "INTERNAL ERROR",
     };
+    pub const SERVICE_UNAVAILABLE: &'static Self = &Self {
+        code: 503,
+        name: "SERVICE UNAVAILABLE",
+    };
 
     /// Get a reference to a defined constant status from a line of HTTP request.
     ///
@@ -140,8 +144,12 @@ impl Status {
             .ok_or(InvalidHTTPNameStatusError::new(name))
     }
 
-    const ALLOWED_STATUS: &'static [&'static Self] =
-        &[Self::OK, Self::NOT_FOUND, Self::INTERNAL_ERROR];
+    const ALLOWED_STATUS: &'static [&'static Self] = &[
+        Self::OK,
+        Self::NOT_FOUND,
+        Self::INTERNAL_ERROR,
+        Self::SERVICE_UNAVAILABLE,
+    ];
 }
 
 pub trait InvalidHTTPStatusError: Debug + Clone {}
