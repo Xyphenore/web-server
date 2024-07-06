@@ -1,6 +1,6 @@
 [package]
 name = "web_server"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["Xyphenore"]
 description = "This is a multithreaded Web server. It is an exercise of the Rust Book."
 readme = "README.md"
