@@ -1,11 +1,11 @@
 use std::cmp::Ordering;
-use std::fmt::{Display, Formatter};
+use std::fmt::{Debug, Display, Formatter};
 use std::ops::Deref;
 use std::string::ToString;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Hash)]
 pub struct Status {
-    code: u32,
+    code: u16,
     name: String,
 }
 
@@ -48,15 +48,15 @@ impl Display for Status {
 }
 
 impl Status {
-    pub const OK: Self = Self {
+    pub const OK: &'static Self = &Self {
         code: 200,
         name: "OK".to_string(),
     };
-    pub const NOT_FOUND: Self = Self {
+    pub const NOT_FOUND: &'static Self = &Self {
         code: 404,
         name: "NOT FOUND".to_string(),
     };
-    pub const INTERNAL_ERROR: Self = Self {
+    pub const INTERNAL_ERROR: &'static Self = &Self {
         code: 500,
         name: "INTERNAL ERROR".to_string(),
     };
@@ -64,68 +64,101 @@ impl Status {
     const ALLOWED_STATUS: Vec<&'static Self> =
         vec![&Self::OK, &Self::NOT_FOUND, &Self::INTERNAL_ERROR];
 
-    pub fn code(&self) -> u32 {
-        self.code
-    }
-
-    pub fn name(&self) -> &str {
-        &self.name
-    }
-
-    pub fn from(value: &str) -> Result<&'static Self, InvalidHTTPFullNameStatusError> {
-        let upper_value = value.to_uppercase();
-
-        Self::ALLOWED_STATUS
-            .iter()
-            .find(|status| status.to_string() == upper_value)
-            .and_then(|status| Some(status.deref()))
-            .ok_or(InvalidHTTPFullNameStatusError::new(value))
-    }
-
-    pub fn from_code(value: u32) -> Result<&'static Self, InvalidHTTPCodeStatusError> {
-        let string_value = value.to_string();
-
-        Self::ALLOWED_STATUS
-            .iter()
-            .find(|status| {
-                let status = status.to_string().split(" ").next().unwrap();
-                status == string_value
-            })
-            .and_then(|status| Some(status.deref()))
-            .ok_or(InvalidHTTPCodeStatusError::new(&string_value))
-    }
-
-    pub fn from_name(value: &str) -> Result<&'static Self, InvalidHTTPNameStatusError> {
-        let upper_value = value.to_uppercase();
+    /// Get a reference to a defined constant status from a line of HTTP request.
+    ///
+    /// The line must be formatted like: `code name`
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let status = Status::from_line("200 OK");
+    /// assert!(status.is_ok());
+    /// if let Ok(status) = status {
+    ///     assert_eq!(status.to_string(), "200 OK");
+    /// }
+    /// ```
+    ///
+    /// ```
+    /// let status = Status::from_line("200");
+    /// assert!(status.is_err());
+    /// ```
+    pub fn from_line(
+        line: impl AsRef<str>,
+    ) -> Result<&'static Self, InvalidHTTPFullNameStatusError> {
+        let upper_line = line.as_ref().to_uppercase();
 
         Self::ALLOWED_STATUS
             .iter()
-            .find(|status| {
-                let mut parts = status.to_string().split(" ");
-                parts.next();
-                upper_value == String::from_iter(parts.collect())
-            })
+            .find(|status| status.to_string() == upper_line)
             .and_then(|status| Some(status.deref()))
-            .ok_or(InvalidHTTPNameStatusError::new(value))
+            .ok_or(InvalidHTTPFullNameStatusError::new(line))
+    }
+
+    /// Get a reference to a defined constant status from a code.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let status = Status::from_code(200);
+    /// assert!(status.is_ok());
+    /// if let Ok(status) = status {
+    ///     assert_eq!(status.to_string(), "200 OK");
+    /// }
+    /// ```
+    ///
+    /// ```
+    /// let status = Status::from_line(10);
+    /// assert!(status.is_err());
+    /// ```
+    pub fn from_code(code: u16) -> Result<&'static Self, InvalidHTTPCodeStatusError> {
+        Self::ALLOWED_STATUS
+            .iter()
+            .find(|status| status.code == code)
+            .and_then(|status| Some(status.deref()))
+            .ok_or(InvalidHTTPCodeStatusError::new(code.to_string()))
+    }
+
+    /// Get a reference to a defined constant status from a status name.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let status = Status::from_name("OK");
+    /// assert!(status.is_ok());
+    /// if let Ok(status) = status {
+    ///     assert_eq!(status.to_string(), "200 OK");
+    /// }
+    /// ```
+    ///
+    /// ```
+    /// let status = Status::from_name("200");
+    /// assert!(status.is_err());
+    /// ```
+    pub fn from_name(name: impl AsRef<str>) -> Result<&'static Self, InvalidHTTPNameStatusError> {
+        let upper_name = name.as_ref().to_uppercase();
+
+        Self::ALLOWED_STATUS
+            .iter()
+            .find(|status| upper_name == status.name)
+            .and_then(|status| Some(status.deref()))
+            .ok_or(InvalidHTTPNameStatusError::new(name))
     }
 }
 
-pub trait InvalidHTTPStatusError {
-    fn new(entry: &str) -> Self;
-}
+trait InvalidHTTPStatusError: Debug + Clone {}
 
 #[derive(Debug, Clone)]
-pub struct InvalidHTTPFullNameStatusError {
+struct InvalidHTTPFullNameStatusError {
     entry: String,
 }
 
 #[derive(Debug, Clone)]
-pub struct InvalidHTTPCodeStatusError {
+struct InvalidHTTPCodeStatusError {
     entry: String,
 }
 
 #[derive(Debug, Clone)]
-pub struct InvalidHTTPNameStatusError {
+struct InvalidHTTPNameStatusError {
     entry: String,
 }
 
@@ -147,26 +180,30 @@ impl Display for InvalidHTTPNameStatusError {
     }
 }
 
-impl InvalidHTTPStatusError for InvalidHTTPFullNameStatusError {
-    fn new(entry: &str) -> Self {
+impl InvalidHTTPFullNameStatusError {
+    fn new(entry: impl AsRef<str>) -> Self {
         Self {
-            entry: entry.to_string(),
+            entry: entry.as_ref().to_string(),
         }
     }
 }
 
-impl InvalidHTTPStatusError for InvalidHTTPCodeStatusError {
-    fn new(entry: &str) -> Self {
+impl InvalidHTTPCodeStatusError {
+    fn new(entry: impl AsRef<str>) -> Self {
         Self {
-            entry: entry.to_string(),
+            entry: entry.as_ref().to_string(),
         }
     }
 }
 
-impl InvalidHTTPStatusError for InvalidHTTPNameStatusError {
-    fn new(entry: &str) -> Self {
+impl InvalidHTTPNameStatusError {
+    fn new(entry: impl AsRef<str>) -> Self {
         Self {
-            entry: entry.to_string(),
+            entry: entry.as_ref().to_string(),
         }
     }
 }
+
+impl InvalidHTTPStatusError for InvalidHTTPFullNameStatusError {}
+impl InvalidHTTPStatusError for InvalidHTTPCodeStatusError {}
+impl InvalidHTTPStatusError for InvalidHTTPNameStatusError {}
