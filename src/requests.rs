@@ -1,4 +1,4 @@
-pub use self::handler::{Debug, RequestHandler};
+pub use self::handler::{Debug, HTTPListener, RequestHandler};
 pub use self::method::Method;
 pub use self::request::Request;
 pub use self::response::Response;

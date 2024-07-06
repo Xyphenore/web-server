@@ -7,7 +7,7 @@ use crate::threads::WorkerPool;
 
 use super::{Method, Request, Response, Status, Version};
 
-type HTTPListener = fn(Request) -> Response;
+pub type HTTPListener = fn(Request) -> Response;
 
 #[derive(Debug)]
 pub struct RequestHandler {
@@ -93,6 +93,8 @@ impl RequestHandler {
             stream.write_all(response.to_string().as_bytes()).unwrap();
         }
     }
+
+    pub fn process_waiting_request(&mut self) {}
 
     fn not_found_handler(request: Request) -> Response {
         let mut response = Response::new(request.version, Status::NOT_FOUND);
