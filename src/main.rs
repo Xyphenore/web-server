@@ -1,9 +1,7 @@
 // https://doc.rust-lang.org/book/ch20-00-final-project-a-web-server.ht
 
-use crate::requests::Method;
-use crate::routes::index::get as get_index;
-use crate::routes::slow_request::get as get_slow_request;
-use crate::server::{Debug, WebServer};
+use crate::routes::{index::get as get_index, slow_request::get as get_slow_request};
+use crate::server::{Debug, Method, WebServer};
 
 mod requests;
 mod routes;

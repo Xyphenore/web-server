@@ -4,8 +4,8 @@ use std::sync::{Arc, Mutex};
 
 use ctrlc;
 
-pub use crate::requests::Debug;
-use crate::requests::{HTTPListener, Method, RequestHandler};
+pub use crate::requests::{Debug, Method};
+use crate::requests::{HTTPListener, RequestHandler};
 
 pub struct WebServer {
     handler: RequestHandler,
