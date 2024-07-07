@@ -4,7 +4,7 @@ pub use self::method::Method;
 pub use self::request::Request;
 pub use self::response::Response;
 pub use self::status::Status;
-pub use self::version::Version;
+use self::version::Version;
 
 mod job;
 mod listener;
