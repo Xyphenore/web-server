@@ -14,12 +14,12 @@ impl Worker {
         Self {
             _handle: Builder::new()
                 .name(format!("Worker - {id}"))
-                .spawn(move || {
-                    while let Ok(job) = queue.lock().unwrap().recv() {
-                        println!("Worker {id} got a job; executing.");
+                .spawn(move || loop {
+                    let job = queue.lock().unwrap().recv().unwrap();
 
-                        job.execute().send();
-                    }
+                    println!("Worker {id} got a job; executing.");
+
+                    job.execute().send();
                 })
                 .unwrap(),
         }
