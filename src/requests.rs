@@ -12,4 +12,11 @@ mod method;
 mod request;
 mod response;
 mod status;
+
+/// Module contains the HTTP [`Version`].
+///
+/// # Errors
+///
+/// - [`InvalidHTTPVersionError`](version::InvalidHTTPVersionError): Indicate that
+/// [`Version::from()`] reads an invalid HTTP version.
 mod version;

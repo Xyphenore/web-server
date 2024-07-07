@@ -1,5 +1,27 @@
 use std::fmt::{Display, Formatter};
 
+/// HTTP version.
+///
+/// # How to use it?
+///
+/// ```rust
+/// use crate::requests::Version;
+///
+/// let version_1 = Version::HTTP_1;
+/// let version_1_1 = Version::HTTP_1_1;
+/// let version_2 = Version::HTTP_2;
+/// let version_3 = Version::HTTP_3;
+///
+/// // You can use it like an enumeration.
+/// ```
+///
+/// ```rust
+/// use crate::requests::Version;
+///
+/// let line = "HTTP/2";
+///
+/// let version = Version::from(line);
+/// ```
 #[derive(Debug, Clone, PartialEq, PartialOrd, Eq, Ord, Hash)]
 pub struct Version {
     #[doc(hidden)]
@@ -19,18 +41,33 @@ impl Display for Version {
 }
 
 impl Version {
+    /// HTTP Version 1
+    ///
+    /// [MDN - HTTP1](https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/Evolution_of_HTTP#http1.0_%E2%80%93_building_extensibility)
     pub const HTTP_1: &'static Version = &Self {
         major: '1',
         minor: '0',
     };
+
+    /// HTTP Version 1.1
+    ///
+    /// [MDN - HTTP1.1](https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/Evolution_of_HTTP#http1.1_%E2%80%93_the_standardized_protocol)
     pub const HTTP_1_1: &'static Version = &Self {
         major: '1',
         minor: '1',
     };
+
+    /// HTTP Version 2
+    ///
+    /// [MDN - HTTP2](https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/Evolution_of_HTTP#http2_%E2%80%93_a_protocol_for_greater_performance)
     pub const HTTP_2: &'static Version = &Self {
         major: '2',
         minor: '0',
     };
+
+    /// HTTP Version 3
+    ///
+    /// [MDN - HTTP3](https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/Evolution_of_HTTP#http3_-_http_over_quic)
     pub const HTTP_3: &'static Version = &Self {
         major: '3',
         minor: '0',
@@ -38,27 +75,37 @@ impl Version {
 
     /// Get a constant reference to an HTTP version.
     ///
-    /// The line must be in the form: HTTP/{version}<br>
-    /// {version} can be 'major' or 'major.minor'
+    /// # Parameters
+    ///
+    /// - `line`: The line must be in the form: `HTTP/{version}`.
+    /// `{version}` can be like `major` or `major.minor`.
+    /// A [`String`] or [`&str`].
+    ///
+    /// # Returns
+    ///
+    /// Returns the constant to the good [`Version`], or a
+    /// [`InvalidHTTPVersionError`] if `line` does not respect the pattern.
     ///
     /// # Examples
     ///
-    /// ```
+    /// ```rust
     /// let version = Version::from("HTTP/1");
     /// assert!(version.is_ok());
+    ///
     /// if let Some(version) = version {
     ///     assert_eq!(version.to_string(), "HTTP/1");
     /// }
     /// ```
     ///
-    /// ```
+    /// ```rust
     /// let version = Version::from("1.0");
     /// assert!(version.is_err());
+    ///
     /// if let Err(error) = version {
     ///     assert_eq!(error, "Invalid HTTP version: '1.0'");
     /// }
     /// ```
-    pub fn from(line: impl AsRef<str>) -> Result<&'static Self, InvalidHTTPVersionError> {
+    pub fn from(line: impl AsRef<str>) -> Result<&'static Version, InvalidHTTPVersionError> {
         let upper_line = line.as_ref().to_uppercase();
 
         Self::ALLOWED_VERSIONS
@@ -74,8 +121,10 @@ impl Version {
         &[Self::HTTP_1, Self::HTTP_1_1, Self::HTTP_2, Self::HTTP_3];
 }
 
+/// Indicate that [`Version::from()`] reads an invalid HTTP version.
 #[derive(Debug, Clone)]
 pub struct InvalidHTTPVersionError {
+    #[doc(hidden)]
     entry: String,
 }
 
@@ -86,7 +135,16 @@ impl Display for InvalidHTTPVersionError {
 }
 
 impl InvalidHTTPVersionError {
-    fn new(entry: impl AsRef<str>) -> Self {
+    /// Create a new instance of [`InvalidHTTPVersionError`] with the invalid entry.
+    ///
+    /// # Parameters
+    ///
+    /// - `entry`: The invalid entry, like a [`String`] or [`&str`].
+    ///
+    /// # Returns
+    ///
+    /// Returns a new instance of [`InvalidHTTPVersionError`].
+    fn new(entry: impl AsRef<str>) -> InvalidHTTPVersionError {
         Self {
             entry: entry.as_ref().to_string(),
         }
