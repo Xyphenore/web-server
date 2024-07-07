@@ -84,7 +84,7 @@ impl WorkerPool {
     ///
     /// - job - The [`Job`] to execute.
     /// If any worker is available, the job is stored in the
-    /// [`std::sync::mpsc::channel`](channel).
+    /// [`std::sync::mpsc::channel`].
     ///
     /// # Returns
     ///
