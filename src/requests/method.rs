@@ -2,8 +2,8 @@ use std::fmt::{Debug, Display, Formatter};
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Method {
-    pub uri: String,
-    pub method: String,
+    uri: String,
+    method: String,
 }
 
 impl Display for Method {
