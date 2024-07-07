@@ -8,7 +8,7 @@ pub struct Method {
 
 impl Display for Method {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", Self::convert(&self.method, &self.uri))
+        write!(f, "{}_{}", self.method.to_uppercase(), &self.uri)
     }
 }
 
@@ -72,10 +72,6 @@ impl Method {
                 method: method.to_uppercase(),
                 uri: uri.to_string(),
             }))
-    }
-
-    pub fn convert(method: impl AsRef<str>, uri: impl AsRef<str>) -> String {
-        method.as_ref().to_uppercase() + "_" + uri.as_ref()
     }
 
     const ALLOWED_METHODS: &'static [&'static str] = &[
