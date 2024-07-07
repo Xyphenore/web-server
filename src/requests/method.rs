@@ -1,8 +1,37 @@
 use std::fmt::{Debug, Display, Formatter};
 
+/// HTTP method
+///
+/// [MDN - Methods](https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods)
+///
+/// # How to use it?
+///
+/// ```rust
+/// use crate::requests::Method;
+///
+/// let get_index = Method::get("/");
+/// let post_index = Method::post("/");
+/// let update_index = Method::update("/");
+/// let delete_index = Method::delete("/");
+/// let options_index = Method::options("/");
+/// let head_index = Method::head("/");
+/// let patch_index = Method::patch("/");
+/// let trace_index = Method::trace("/");
+/// let connect_index = Method::connect("/");
+/// ```
+///
+/// ```rust
+/// use crate::requests::Method;
+///
+/// let line = "GET /";
+///
+/// let method = Method::from_line(line);
+/// ```
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Method {
+    #[doc(hidden)]
     uri: String,
+    #[doc(hidden)]
     method: String,
 }
 
@@ -13,39 +42,220 @@ impl Display for Method {
 }
 
 impl Method {
-    pub fn get(uri: impl AsRef<str>) -> Result<Self, InvalidURIError> {
+    /// Create a `GET` method with the URI.
+    ///
+    /// # Parameters
+    ///
+    /// - `uri`: The URI must be not blank.
+    /// A [`String`] or [`&str`].
+    ///
+    /// # Returns
+    ///
+    /// Returns the new instance [`Method`], or [`InvalidURIError`] if `uri` is blank.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use crate::requests::Method;
+    ///
+    /// let get_index = Method::get("/");
+    /// ```
+    pub fn get(uri: impl AsRef<str>) -> Result<Method, InvalidURIError> {
         Self::build("GET", uri)
     }
-    pub fn post(uri: impl AsRef<str>) -> Result<Self, InvalidURIError> {
+
+    /// Create a `POST` method with the URI.
+    ///
+    /// # Parameters
+    ///
+    /// - `uri`: The URI must be not blank.
+    /// A [`String`] or [`&str`].
+    ///
+    /// # Returns
+    ///
+    /// Returns the new instance [`Method`], or [`InvalidURIError`] if `uri` is blank.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use crate::requests::Method;
+    ///
+    /// let post_index = Method::post("/");
+    /// ```
+    pub fn post(uri: impl AsRef<str>) -> Result<Method, InvalidURIError> {
         Self::build("POST", uri)
     }
-    pub fn update(uri: impl AsRef<str>) -> Result<Self, InvalidURIError> {
+
+    /// Create an `UPDATE` method with the URI.
+    ///
+    /// # Parameters
+    ///
+    /// - `uri`: The URI must be not blank.
+    /// A [`String`] or [`&str`].
+    ///
+    /// # Returns
+    ///
+    /// Returns the new instance [`Method`], or [`InvalidURIError`] if `uri` is blank.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use crate::requests::Method;
+    ///
+    /// let update_index = Method::update("/");
+    /// ```
+    pub fn update(uri: impl AsRef<str>) -> Result<Method, InvalidURIError> {
         Self::build("UPDATE", uri)
     }
-    pub fn patch(uri: impl AsRef<str>) -> Result<Self, InvalidURIError> {
+
+    /// Create a `PATCH` method with the URI.
+    ///
+    /// # Parameters
+    ///
+    /// - `uri`: The URI must be not blank.
+    /// A [`String`] or [`&str`].
+    ///
+    /// # Returns
+    ///
+    /// Returns the new instance [`Method`], or [`InvalidURIError`] if `uri` is blank.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use crate::requests::Method;
+    ///
+    /// let patch_index = Method::patch("/");
+    /// ```
+    pub fn patch(uri: impl AsRef<str>) -> Result<Method, InvalidURIError> {
         Self::build("PATCH", uri)
     }
-    pub fn delete(uri: impl AsRef<str>) -> Result<Self, InvalidURIError> {
+
+    /// Create a `DELETE` method with the URI.
+    ///
+    /// # Parameters
+    ///
+    /// - `uri`: The URI must be not blank.
+    /// A [`String`] or [`&str`].
+    ///
+    /// # Returns
+    ///
+    /// Returns the new instance [`Method`], or [`InvalidURIError`] if `uri` is blank.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use crate::requests::Method;
+    ///
+    /// let delete_index = Method::delete("/");
+    /// ```
+    pub fn delete(uri: impl AsRef<str>) -> Result<Method, InvalidURIError> {
         Self::build("DELETE", uri)
     }
-    pub fn head(uri: impl AsRef<str>) -> Result<Self, InvalidURIError> {
+
+    /// Create a `HEAD` method with the URI.
+    ///
+    /// # Parameters
+    ///
+    /// - `uri`: The URI must be not blank.
+    /// A [`String`] or [`&str`].
+    ///
+    /// # Returns
+    ///
+    /// Returns the new instance [`Method`], or [`InvalidURIError`] if `uri` is blank.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use crate::requests::Method;
+    ///
+    /// let head_index = Method::head("/");
+    /// ```
+    pub fn head(uri: impl AsRef<str>) -> Result<Method, InvalidURIError> {
         Self::build("HEAD", uri)
     }
-    pub fn options(uri: impl AsRef<str>) -> Result<Self, InvalidURIError> {
+
+    /// Create an `OPTIONS` method with the URI.
+    ///
+    /// # Parameters
+    ///
+    /// - `uri`: The URI must be not blank.
+    /// A [`String`] or [`&str`].
+    ///
+    /// # Returns
+    ///
+    /// Returns the new instance [`Method`], or [`InvalidURIError`] if `uri` is blank.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use crate::requests::Method;
+    ///
+    /// let options_index = Method::options("/");
+    /// ```
+    pub fn options(uri: impl AsRef<str>) -> Result<Method, InvalidURIError> {
         Self::build("OPTIONS", uri)
     }
-    pub fn connect(uri: impl AsRef<str>) -> Result<Self, InvalidURIError> {
+
+    /// Create a `CONNECT` method with the URI.
+    ///
+    /// # Parameters
+    ///
+    /// - `uri`: The URI must be not blank.
+    /// A [`String`] or [`&str`].
+    ///
+    /// # Returns
+    ///
+    /// Returns the new instance [`Method`], or [`InvalidURIError`] if `uri` is blank.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use crate::requests::Method;
+    ///
+    /// let connect_index = Method::connect("/");
+    /// ```
+    pub fn connect(uri: impl AsRef<str>) -> Result<Method, InvalidURIError> {
         Self::build("CONNECT", uri)
     }
-    pub fn trace(uri: impl AsRef<str>) -> Result<Self, InvalidURIError> {
+
+    /// Create a `TRACE` method with the URI.
+    ///
+    /// # Parameters
+    ///
+    /// - `uri`: The URI must be not blank.
+    /// A [`String`] or [`&str`].
+    ///
+    /// # Returns
+    ///
+    /// Returns the new instance [`Method`], or [`InvalidURIError`] if `uri` is blank.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use crate::requests::Method;
+    ///
+    /// let trace_index = Method::trace("/");
+    /// ```
+    pub fn trace(uri: impl AsRef<str>) -> Result<Method, InvalidURIError> {
         Self::build("TRACE", uri)
     }
 
-    /// Create a new instance from the line
+    /// Create a new instance of [`Method`] from the line.
+    ///
+    /// # Parameters
+    ///
+    /// - `line`: The line must start like: `METHOD URI`.
+    /// A [`String`] or [`&str`].
+    ///
+    /// # Returns
+    ///
+    /// Returns the instance of [`Method`], or the error if `line` is invalid.
     ///
     /// # Examples
     ///
     /// ```
+    /// use crate::requests::Method;
+    ///
     /// let method = Method::from_line("GET /");
     /// assert!(method.is_ok());
     /// if let Ok(method) = method {
@@ -54,10 +264,12 @@ impl Method {
     /// ```
     ///
     /// ```
+    /// use crate::requests::Method;
+    ///
     /// let method = Method::from_line("NOT /");
     /// assert!(method.is_err());
     /// ```
-    pub fn from_line(line: impl AsRef<str>) -> Result<Self, Box<dyn InvalidMethodPartError>> {
+    pub fn from_line(line: impl AsRef<str>) -> Result<Method, Box<dyn InvalidMethodPartError>> {
         let parts: Vec<_> = line.as_ref().split(' ').collect();
         let method = parts[0];
         let uri = parts[1];
@@ -74,10 +286,33 @@ impl Method {
             }))
     }
 
+    /// All allowed methods in the HTTP protocol.
+    ///
+    /// [MDN - Methods](https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods)
+    #[doc(hidden)]
     const ALLOWED_METHODS: &'static [&'static str] = &[
         "GET", "UPDATE", "POST", "DELETE", "PATCH", "HEAD", "OPTIONS", "CONNECT", "TRACE",
     ];
-    fn build(method: impl AsRef<str>, uri: impl AsRef<str>) -> Result<Self, InvalidURIError> {
+
+    /// Build a [`Method`] with the `method` and `uri`.
+    ///
+    /// # Parameters
+    ///
+    /// - `method`: A value in [`Method::ALLOWED_METHODS`].
+    /// A [`String`] or [`&str`].
+    /// - `uri`: The URI of the method.
+    /// A [`String`] or [`&str`].
+    ///
+    /// # Returns
+    ///
+    /// Returns a new instance of [`Method`] if all is good or an [`InvalidURIError`]
+    /// if the `uri` is blank.
+    ///
+    /// # Panics
+    ///
+    /// If `method` is not in [`Method::ALLOWED_METHODS`].
+    #[doc(hidden)]
+    fn build(method: impl AsRef<str>, uri: impl AsRef<str>) -> Result<Method, InvalidURIError> {
         let method = method.as_ref();
         let uri = uri.as_ref();
 
@@ -90,6 +325,18 @@ impl Method {
             }))
     }
 
+    /// Check if `uri` is not empty or blank.
+    ///
+    /// # Parameters
+    ///
+    /// - `uri`: The URI of the method.
+    /// A [`String`] or [`&str`].
+    ///
+    /// # Returns
+    ///
+    /// Returns nothing if the `uri` is good, or [`InvalidURIError`] if the `uri` is
+    /// blank.
+    #[doc(hidden)]
     fn check_uri(uri: impl AsRef<str>) -> Result<(), InvalidURIError> {
         let uri = uri.as_ref();
         if uri.trim().is_empty() {
@@ -99,6 +346,18 @@ impl Method {
         Ok(())
     }
 
+    /// Check if `method` is in [`Method::ALLOWED_METHODS`].
+    ///
+    /// # Parameters
+    ///
+    /// - `method`: The verb of the method.
+    /// A [`String`] or [`&str`].
+    ///
+    /// # Returns
+    ///
+    /// Returns nothing if the `method` is in [`Method::ALLOWED_METHODS`], or
+    /// [`InvalidMethodError`] if the `method` is blank.
+    #[doc(hidden)]
     fn check_method(method: impl AsRef<str>) -> Result<(), InvalidMethodError> {
         let method = method.as_ref();
         if !Self::ALLOWED_METHODS.contains(&method) {
@@ -109,10 +368,13 @@ impl Method {
     }
 }
 
+/// Indicate that [`Method::from_line()`] reads an invalid part (URI, Method).
 pub trait InvalidMethodPartError: Debug {}
 
+/// Indicate that [`Method::from_line()`] reads an invalid URI.
 #[derive(Debug, Clone)]
 pub struct InvalidURIError {
+    #[doc(hidden)]
     entry: String,
 }
 
@@ -123,7 +385,16 @@ impl Display for InvalidURIError {
 }
 
 impl InvalidURIError {
-    fn new(entry: impl AsRef<str>) -> Self {
+    /// Create a new instance of [`InvalidURIError`] with the invalid entry.
+    ///
+    /// # Parameters
+    ///
+    /// - `entry`: The invalid entry, like a [`String`] or [`&str`]
+    ///
+    /// # Returns
+    ///
+    /// Returns a new instance of [`InvalidURIError`].
+    fn new(entry: impl AsRef<str>) -> InvalidURIError {
         Self {
             entry: entry.as_ref().to_string(),
         }
@@ -132,8 +403,10 @@ impl InvalidURIError {
 
 impl InvalidMethodPartError for InvalidURIError {}
 
+/// Indicate that [`Method::from_line()`] reads an invalid method verb.
 #[derive(Debug, Clone)]
 pub struct InvalidMethodError {
+    #[doc(hidden)]
     entry: String,
 }
 
@@ -144,7 +417,16 @@ impl Display for InvalidMethodError {
 }
 
 impl InvalidMethodError {
-    fn new(entry: impl AsRef<str>) -> Self {
+    /// Create a new instance of [`InvalidMethodError`] with the invalid entry.
+    ///
+    /// # Parameters
+    ///
+    /// - `entry`: The invalid entry, like a [`String`] or [`&str`]
+    ///
+    /// # Returns
+    ///
+    /// Returns a new instance of [`InvalidMethodError`].
+    fn new(entry: impl AsRef<str>) -> InvalidMethodError {
         Self {
             entry: entry.as_ref().to_string(),
         }
