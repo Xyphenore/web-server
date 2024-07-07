@@ -9,13 +9,9 @@ use crate::requests::{Request, Response, Status};
 /// The function sleeps 5 secondes before returning the response, to simulate a slow
 /// request to process.
 ///
-/// # Parameters
-///
-/// - request: [`Request`]
-///
 /// # Returns
 ///
-/// [`Response`] - The response to send with [`Response::send()`], with the HTML page
+/// Returns the response to send with [`Response::send()`], with the HTML page
 /// [`templates/slow_request.html`](/templates/slow_request.html).
 ///
 /// # Panics

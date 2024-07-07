@@ -4,13 +4,9 @@ use crate::requests::{Request, Response, Status};
 
 /// Process the `GET /`.
 ///
-/// # Parameters
-///
-/// - request: [`Request`]
-///
 /// # Returns
 ///
-/// [`Response`] - The response to send with [`Response::send()`], with the HTML page
+/// Returns the response to send with [`Response::send()`], with the HTML page
 /// [`templates/index.html`](/templates/index.html).
 ///
 /// # Panics
