@@ -1,24 +1,41 @@
+use std::collections::HashMap;
 use std::io::ErrorKind::WouldBlock;
-use std::net::TcpListener;
+use std::net::{TcpListener, TcpStream};
+use std::path::Path;
 use std::sync::{Arc, Mutex};
 
-pub use crate::requests::{Debug, Method};
-use crate::requests::{HTTPListener, RequestHandler};
+pub use crate::requests::Method;
+use crate::requests::{HTTPListener, Request, Response, Status};
+use crate::threads::WorkerPool;
 
 pub struct WebServer {
     #[doc(hidden)]
-    handler: RequestHandler,
+    cpt: usize,
+    #[doc(hidden)]
+    debug: bool,
+    #[doc(hidden)]
+    listeners: HashMap<Method, HTTPListener>,
+    #[doc(hidden)]
+    workers: WorkerPool,
 }
 
 impl WebServer {
-    pub fn new(amount_threads: usize, debug: Debug) -> Self {
+    pub fn new(amount_threads: usize, debug: Debug) -> WebServer {
         Self {
-            handler: RequestHandler::new(amount_threads, debug),
+            cpt: 0,
+            debug: debug == Debug::True,
+            listeners: HashMap::new(),
+            workers: WorkerPool::new(amount_threads),
         }
     }
 
     pub fn add_listener(&mut self, method: Method, listener: HTTPListener) -> &mut Self {
-        self.handler.add_listener(method, listener);
+        if self.listeners.contains_key(&method) {
+            panic!("A listener is always registered for {}", method)
+        }
+
+        self.listeners.insert(method, listener);
+
         self
     }
 
@@ -49,10 +66,52 @@ impl WebServer {
                     stream
                         .set_nonblocking(false)
                         .expect("Cannot make the TCP stream to blocking mode.");
-                    self.handler.handle(stream);
+                    self.handle(stream);
                 }
                 Err(error) => panic!("encountered IO error: {}", error),
             }
+        }
+    }
+
+    fn handle(&mut self, stream: TcpStream) {
+        let request = Request::from_stream(stream);
+
+        if self.debug {
+            println!("Request {}: {request:#?}", self.cpt);
+        }
+        self.cpt += 1;
+
+        let listener = self
+            .listeners
+            .get(&request.method)
+            .unwrap_or(&(WebServer::not_found_handler as HTTPListener));
+
+        self.workers
+            .execute(request.make_job_with_listener(*listener))
+            .unwrap();
+    }
+
+    fn not_found_handler(request: Request) -> Response {
+        let mut response = request.make_response_with_status(Status::NOT_FOUND);
+        response
+            .add_file(Path::new("templates/not_found.html"))
+            .unwrap();
+
+        response
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum Debug {
+    True,
+    False,
+}
+
+impl Debug {
+    pub fn from(value: bool) -> Debug {
+        match value {
+            true => Self::True,
+            false => Self::False,
         }
     }
 }
