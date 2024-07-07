@@ -5,9 +5,9 @@ use crate::requests::Job;
 
 use super::worker::Worker;
 
-/// A pool of workers to execute multiple jobs in parallel.
+/// A pool of workers to execute multiple [`Job`]s in parallel.
 ///
-/// # How creates it
+/// # How to create it?
 ///
 /// ```rust
 /// // Logic in the server in `src/server.rs`.
@@ -20,7 +20,7 @@ use super::worker::Worker;
 /// // Now, the pool waits a job.
 /// ```
 ///
-/// # How stops it
+/// # How to stop it?
 ///
 /// To stop the pool, just drop it.
 ///
@@ -50,15 +50,15 @@ impl WorkerPool {
     ///
     /// # Parameters
     ///
-    /// - capacity - The number of threads in the pool.
+    /// - `capacity`: The number of threads in the pool.
     ///
     /// # Returns
     ///
-    /// Returns a new [`WorkerPool`].
+    /// Returns a new instance of [`WorkerPool`].
     ///
     /// # Panics
     ///
-    /// If the size is zero.
+    /// - If the size is zero.
     pub fn new(capacity: usize) -> WorkerPool {
         if capacity == 0 {
             panic!("Pool capacity cannot be zero");
@@ -82,18 +82,18 @@ impl WorkerPool {
     ///
     /// # Parameters
     ///
-    /// - job - The [`Job`] to execute.
+    /// - `job`: The [`Job`] to execute.
     /// If any worker is available, the job is stored in the
-    /// [`std::sync::mpsc::channel`].
+    /// [`std::sync::mpsc::channel()`] and the `job` waits that a worker is available.
     ///
     /// # Returns
     ///
-    /// Returns the error if the queue cannot accept the [`Job`], else returns nothing
-    /// if all is good.
+    /// Returns a [`SendError`] if the queue cannot accept the [`Job`], else returns
+    /// nothing if all is good.
     ///
     /// # Panics
     ///
-    /// If the pool is used during its drop.
+    /// - If the pool is used during its drop.
     pub fn execute(&mut self, job: Job) -> Result<(), SendError<Job>> {
         self.queue.as_ref().unwrap().send(job)
     }

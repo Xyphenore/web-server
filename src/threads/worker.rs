@@ -14,7 +14,7 @@ use crate::requests::Job;
 ///
 /// </div>
 ///
-/// # How creates it
+/// # How to create it?
 ///
 /// ```rust
 /// // Logic in the pool in `src/threads/pool.rs`.
@@ -31,12 +31,12 @@ use crate::requests::Job;
 /// // Now, the worker waits a job.
 /// ```
 ///
-/// The created thread waits until a job is sent by [`WorkerPool`][WorkerPool]
+/// The created thread waits until a job is sent by [`WorkerPool`][WorkerPool].
 ///
-/// # How stops it
+/// # How to stop it?
 ///
 /// To stop the worker execution, just drop the emitter/sender (tx) of the
-/// [`std::sync::mpsc::channel`], like `drop(tx)`.
+/// [`std::sync::mpsc::channel()`], like `drop(tx)`.
 ///
 /// ```rust
 /// // Logic in the pool in `src/threads/pool.rs`.
@@ -56,7 +56,7 @@ use crate::requests::Job;
 /// worker.join().unwrap();
 /// ```
 ///
-/// # Name
+/// # About the worker name
 ///
 /// The created thread has a name like: `Worker-{id}`, where `{id}` is
 /// replaced by the given ID in [`Worker::new()`].
@@ -71,12 +71,13 @@ pub struct Worker {
 }
 
 impl Worker {
-    /// Create a new worker with the id and the queue receiver.
+    /// Create a new worker with the ID and the receiver part of the
+    /// [`std::sync::mpsc::channel()`] aka `queue`.
     ///
     /// # Parameters
     ///
-    /// - id - ID given by the [`WorkerPool`][WorkerPool].
-    /// - queue - The receiver (rx) of the channel created by the
+    /// - `id`: ID given by the [`WorkerPool`][WorkerPool].
+    /// - `queue`: The receiver (rx) part of the channel created by the
     /// [`WorkerPool`][WorkerPool].
     ///
     /// # Returns
@@ -85,7 +86,7 @@ impl Worker {
     ///
     /// # Panics
     ///
-    /// If the spawn of the created thread returns an error.
+    /// - If the spawn of the created thread returns an error.
     ///
     /// <!-- References -->
     ///
