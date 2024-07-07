@@ -3,7 +3,9 @@ use std::fmt::{Debug, Display, Formatter};
 
 #[derive(Debug, Clone)]
 pub struct Status {
+    #[doc(hidden)]
     code: u16,
+    #[doc(hidden)]
     name: &'static str,
 }
 

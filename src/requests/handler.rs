@@ -10,9 +10,13 @@ pub type HTTPListener = fn(Request) -> Response;
 
 #[derive(Debug)]
 pub struct RequestHandler {
+    #[doc(hidden)]
     cpt: usize,
+    #[doc(hidden)]
     debug: bool,
+    #[doc(hidden)]
     listeners: HashMap<Method, HTTPListener>,
+    #[doc(hidden)]
     workers: WorkerPool,
 }
 
@@ -41,6 +45,9 @@ impl RequestHandler {
         }
     }
 
+    ///
+    /// # Examples
+    ///
     pub fn add_listener(&mut self, method: Method, listener: HTTPListener) {
         if self.listeners.contains_key(&method) {
             panic!("A listener is always registered for {}", method)

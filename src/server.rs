@@ -6,6 +6,7 @@ pub use crate::requests::{Debug, Method};
 use crate::requests::{HTTPListener, RequestHandler};
 
 pub struct WebServer {
+    #[doc(hidden)]
     handler: RequestHandler,
 }
 

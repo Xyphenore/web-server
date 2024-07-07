@@ -8,9 +8,13 @@ use super::{Status, Version};
 
 #[derive(Debug)]
 pub struct Response {
+    #[doc(hidden)]
     version: &'static Version,
+    #[doc(hidden)]
     status: &'static Status,
+    #[doc(hidden)]
     contents: String,
+    #[doc(hidden)]
     stream: TcpStream,
 }
 

@@ -2,7 +2,9 @@ use crate::requests::{HTTPListener, Request, Response};
 
 #[derive(Debug)]
 pub struct Job {
+    #[doc(hidden)]
     request: Request,
+    #[doc(hidden)]
     listener: HTTPListener,
 }
 

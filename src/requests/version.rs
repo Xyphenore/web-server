@@ -2,7 +2,9 @@ use std::fmt::{Display, Formatter};
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Eq, Ord, Hash)]
 pub struct Version {
+    #[doc(hidden)]
     major: char,
+    #[doc(hidden)]
     minor: char,
 }
 
