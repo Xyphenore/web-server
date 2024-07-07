@@ -24,12 +24,12 @@ use crate::requests::{Request, Response, Status};
 ///
 /// # Examples
 ///
-/// Check examples of [`RequestHandler::add_listener()`][add_listener],
+/// Check examples of [`WebServer::add_listener()`][add_listener],
 /// to see how to add the function to process the `GET /slow_request`.
 ///
 /// <!-- References -->
 ///
-/// [add_listener]: crate::requests::RequestHandler::add_listener()
+/// [add_listener]: crate::server::WebServer::add_listener()
 pub fn get(request: Request) -> Response {
     let mut response = request.make_response_with_status(Status::OK);
     response
