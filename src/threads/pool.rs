@@ -7,8 +7,18 @@ use super::worker::Worker;
 
 #[derive(Debug)]
 pub struct WorkerPool {
-    _workers: Vec<Worker>,
-    queue: Sender<Job>,
+    workers: Vec<Worker>,
+    queue: Option<Sender<Job>>,
+}
+
+impl Drop for WorkerPool {
+    fn drop(&mut self) {
+        drop(self.queue.take());
+
+        while !self.workers.is_empty() {
+            self.workers.remove(0).join().unwrap();
+        }
+    }
 }
 
 impl WorkerPool {
@@ -33,12 +43,12 @@ impl WorkerPool {
         }
 
         Self {
-            _workers: workers,
-            queue: sender,
+            workers,
+            queue: Some(sender),
         }
     }
 
     pub fn execute(&mut self, job: Job) -> Result<(), SendError<Job>> {
-        self.queue.send(job)
+        self.queue.as_ref().unwrap().send(job)
     }
 }

@@ -20,6 +20,7 @@ include = ["/src", "README.md", "LICENSE.md"]
 maintenance = { status = "deprecated" }
 
 [dependencies]
+ctrlc = "3.4.4"
 
 [dev-dependencies]
 
