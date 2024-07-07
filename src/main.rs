@@ -8,17 +8,17 @@ mod routes;
 mod server;
 mod threads;
 
+#[doc(hidden)]
 static DEBUG: bool = false;
 
 /// Executable script to start the Web server.
 ///
-/// Register [`routes::index::get()`] and [`routes::slow_request::get()`] in the
-/// server.
+/// Add [`routes::index::get()`] and [`routes::slow_request::get()`] to the server.
 /// The server listens on `127.0.0.1:8000`.
 ///
 /// # Panics
 ///
-/// If any method from [`WebServer::serve()`] or [`WebServer::add_listener()`] panic.
+/// - If any method ([`WebServer::serve()`] or [`WebServer::add_listener()`]) panics.
 fn main() {
     WebServer::new(2, Debug::from(DEBUG))
         .add_listener(Method::get("/").unwrap(), get_index)
