@@ -14,9 +14,23 @@ pub type HTTPListener = fn(Request) -> Response;
 
 /// Module contains the [`Job`] structure.
 mod job;
-mod listener;
+
+/// Module contains the HTTP [`Method`].
+///
+/// # Errors
+///
+/// - [`InvalidMethodPartError`](method::InvalidMethodPartError): Indicate that
+/// [`Method::from_line()`] reads an invalid part (URI, Method).
+/// - [`InvalidMethodError`](method::InvalidMethodError): Indicate that
+/// [`Method::from_line()`] reads an invalid method verb.
+/// - [`InvalidURIError`](method::InvalidURIError): Indicate that
+/// [`Method::from_line()`] reads an invalid URI.
 mod method;
+
+/// Module contains the [`Request`] structure.
 mod request;
+
+/// Module contains the [`Response`] structure.
 mod response;
 
 /// Module contains the HTTP [`Status`].
