@@ -6,9 +6,9 @@ use super::{HTTPListener, Job, Method, Response, Status, Version};
 #[derive(Debug)]
 pub struct Request {
     pub method: Method,
-    pub version: &'static Version,
+    version: &'static Version,
     pub _other_lines: Vec<String>,
-    pub stream: TcpStream,
+    stream: TcpStream,
 }
 
 impl Request {
