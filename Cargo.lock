@@ -50,7 +50,7 @@ dependencies = [
 
 [[package]]
 name = "web_server"
-version = "0.6.1"
+version = "0.6.2"
 dependencies = [
  "ctrlc",
 ]
