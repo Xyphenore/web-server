@@ -7,7 +7,7 @@ use super::{HTTPListener, Job, Method, Response, Status, Version};
 pub struct Request {
     pub method: Method,
     pub version: &'static Version,
-    pub other_lines: Vec<String>,
+    pub _other_lines: Vec<String>,
     pub stream: TcpStream,
 }
 
@@ -32,7 +32,7 @@ impl Request {
         Request {
             method,
             version: Version::from(String::from_iter(parts)).unwrap(),
-            other_lines: http_request,
+            _other_lines: http_request,
             stream,
         }
     }
