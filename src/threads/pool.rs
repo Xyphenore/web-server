@@ -5,9 +5,33 @@ use crate::requests::Job;
 
 use super::worker::Worker;
 
+/// A pool of workers to execute multiple jobs in parallel.
+///
+/// # How creates it
+///
+/// ```rust
+/// // Logic in the server in `src/server.rs`.
+///
+/// use crate::threads::WorkerPool;
+///
+/// // Create a pool of 5 workers.
+/// let workers = WorkerPool::new(5);
+///
+/// // Now, the pool waits a job.
+/// ```
+///
+/// # How stops it
+///
+/// To stop the pool, just drop it.
+///
+/// <!-- References -->
+///
+/// [WorkerPool]: WorkerPool
 #[derive(Debug)]
 pub struct WorkerPool {
+    #[doc(hidden)]
     workers: Vec<Worker>,
+    #[doc(hidden)]
     queue: Option<Sender<Job>>,
 }
 
@@ -22,14 +46,20 @@ impl Drop for WorkerPool {
 }
 
 impl WorkerPool {
-    /// Create a new ThreadPool.
+    /// Create a new WorkerPool.
     ///
-    /// The capacity is the number of threads in the pool.
+    /// # Parameters
+    ///
+    /// - capacity - The number of threads in the pool.
+    ///
+    /// # Returns
+    ///
+    /// Returns a new [`WorkerPool`].
     ///
     /// # Panics
     ///
-    /// The `new` function will panic if the size is zero.
-    pub fn new(capacity: usize) -> Self {
+    /// If the size is zero.
+    pub fn new(capacity: usize) -> WorkerPool {
         if capacity == 0 {
             panic!("Pool capacity cannot be zero");
         }
@@ -48,6 +78,22 @@ impl WorkerPool {
         }
     }
 
+    /// Execute a [`Job`] in any worker.
+    ///
+    /// # Parameters
+    ///
+    /// - job - The [`Job`] to execute.
+    /// If any worker is available, the job is stored in the
+    /// [`std::sync::mpsc::channel`](channel).
+    ///
+    /// # Returns
+    ///
+    /// Returns the error if the queue cannot accept the [`Job`], else returns nothing
+    /// if all is good.
+    ///
+    /// # Panics
+    ///
+    /// If the pool is used during its drop.
     pub fn execute(&mut self, job: Job) -> Result<(), SendError<Job>> {
         self.queue.as_ref().unwrap().send(job)
     }
