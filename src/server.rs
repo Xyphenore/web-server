@@ -20,12 +20,12 @@ pub struct WebServer {
 }
 
 impl WebServer {
-    pub fn new(amount_threads: usize, debug: Debug) -> WebServer {
+    pub fn new(amount_workers: usize, debug: Debug) -> WebServer {
         Self {
             cpt: 0,
             debug: debug == Debug::True,
             listeners: HashMap::new(),
-            workers: WorkerPool::new(amount_threads),
+            workers: WorkerPool::new(amount_workers),
         }
     }
 
