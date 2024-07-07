@@ -1,10 +1,14 @@
-use std::fmt::{Display, Formatter};
+use std::sync::mpsc::{channel, SendError, Sender};
+use std::sync::{Arc, Mutex};
+
+use crate::requests::Job;
 
 use super::worker::Worker;
 
 #[derive(Debug)]
 pub struct WorkerPool {
-    workers: Vec<Worker>,
+    _workers: Vec<Worker>,
+    queue: Sender<Job>,
 }
 
 impl WorkerPool {
@@ -20,51 +24,21 @@ impl WorkerPool {
             panic!("Pool capacity cannot be zero");
         }
 
+        let (sender, receiver) = channel();
+        let receiver = Arc::new(Mutex::new(receiver));
+
         let mut workers = Vec::with_capacity(capacity);
         for id in 0..capacity {
-            workers.push(Worker::new(id));
+            workers.push(Worker::new(id, Arc::clone(&receiver)));
         }
 
-        Self { workers }
-    }
-
-    pub fn execute(
-        &mut self,
-        executor: impl FnOnce() + Send + 'static,
-    ) -> Result<(), NoAvailableWorkerError> {
-        let mut has_executed = false;
-
-        for worker in self.workers.iter_mut() {
-            if worker.is_available() {
-                worker.execute(executor);
-                has_executed = true;
-                break;
-            }
+        Self {
+            _workers: workers,
+            queue: sender,
         }
-
-        if !has_executed {
-            return Err(NoAvailableWorkerError::new());
-        }
-
-        Ok(())
     }
 
-    pub fn is_any_available(&self) -> bool {
-        self.workers.iter().any(|worker| worker.is_available())
-    }
-}
-
-#[derive(Debug, Clone)]
-pub struct NoAvailableWorkerError {}
-
-impl Display for NoAvailableWorkerError {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "Any worker is available in the pool.")
-    }
-}
-
-impl NoAvailableWorkerError {
-    fn new() -> Self {
-        Self {}
+    pub fn execute(&mut self, job: Job) -> Result<(), SendError<Job>> {
+        self.queue.send(job)
     }
 }

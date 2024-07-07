@@ -1,36 +1,27 @@
+use std::sync::mpsc::Receiver;
+use std::sync::{Arc, Mutex};
 use std::thread::{Builder, JoinHandle};
+
+use crate::requests::Job;
 
 #[derive(Debug)]
 pub struct Worker {
-    id: usize,
-    handle: Option<JoinHandle<()>>,
+    _handle: JoinHandle<()>,
 }
 
 impl Worker {
-    pub fn new(id: usize) -> Self {
-        Self { id, handle: None }
-    }
+    pub fn new(id: usize, queue: Arc<Mutex<Receiver<Job>>>) -> Self {
+        Self {
+            _handle: Builder::new()
+                .name(format!("Worker - {id}"))
+                .spawn(move || loop {
+                    let job = queue.lock().unwrap().recv().unwrap();
 
-    pub fn execute(&mut self, executor: impl FnOnce() + Send + 'static) {
-        if !self.is_available() {
-            panic!(
-                "Cannot execute the executor of the Worker-{} because it is busy.",
-                self.id,
-            )
-        }
+                    println!("Worker {id} got a job; executing.");
 
-        self.handle = None;
-        self.handle = Some(
-            Builder::new()
-                .name(format!("Worker - {}", self.id))
-                .spawn(executor)
+                    job.execute().send();
+                })
                 .unwrap(),
-        );
-    }
-
-    pub fn is_available(&self) -> bool {
-        self.handle
-            .as_ref()
-            .map_or(true, |handle| handle.is_finished())
+        }
     }
 }

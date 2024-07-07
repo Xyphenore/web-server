@@ -8,9 +8,9 @@ pub struct WebServer {
 }
 
 impl WebServer {
-    pub fn new(amount_threads: usize, debug: Debug, waiting_job_limit: usize) -> Self {
+    pub fn new(amount_threads: usize, debug: Debug) -> Self {
         Self {
-            handler: RequestHandler::new(amount_threads, debug, waiting_job_limit),
+            handler: RequestHandler::new(amount_threads, debug),
         }
     }
 
@@ -43,8 +43,6 @@ impl WebServer {
                 }
                 Err(error) => panic!("encountered IO error: {}", error),
             }
-
-            self.handler.process_waiting_requests();
         }
     }
 }

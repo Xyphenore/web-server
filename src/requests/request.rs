@@ -1,7 +1,7 @@
 use std::io::{BufRead, BufReader};
 use std::net::TcpStream;
 
-use super::{Method, Response, Status, Version};
+use super::{HTTPListener, Job, Method, Response, Status, Version};
 
 #[derive(Debug)]
 pub struct Request {
@@ -39,5 +39,9 @@ impl Request {
 
     pub fn make_response_with_status(self, status: &'static Status) -> Response {
         Response::new(self.version, status, self.stream)
+    }
+
+    pub fn make_job_with_listener(self, listener: HTTPListener) -> Job {
+        Job::new(self, listener)
     }
 }

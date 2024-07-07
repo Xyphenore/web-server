@@ -50,12 +50,4 @@ impl Status {
         code: 404,
         name: "NOT FOUND",
     };
-    pub const INTERNAL_ERROR: &'static Self = &Self {
-        code: 500,
-        name: "INTERNAL ERROR",
-    };
-    pub const SERVICE_UNAVAILABLE: &'static Self = &Self {
-        code: 503,
-        name: "SERVICE UNAVAILABLE",
-    };
 }
