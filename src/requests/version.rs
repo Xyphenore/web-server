@@ -19,25 +19,22 @@ impl Display for Version {
 }
 
 impl Version {
-    pub const HTTP1: &'static Self = &Self {
+    pub const HTTP_1: &'static Version = &Self {
         major: '1',
         minor: '0',
     };
-    pub const HTTP1_1: &'static Self = &Self {
+    pub const HTTP_1_1: &'static Version = &Self {
         major: '1',
         minor: '1',
     };
-    pub const HTTP2: &'static Self = &Self {
+    pub const HTTP_2: &'static Version = &Self {
         major: '2',
         minor: '0',
     };
-    pub const HTTP3: &'static Self = &Self {
+    pub const HTTP_3: &'static Version = &Self {
         major: '3',
         minor: '0',
     };
-
-    const ALLOWED_VERSIONS: &'static [&'static Self] =
-        &[Self::HTTP1, Self::HTTP1_1, Self::HTTP2, Self::HTTP3];
 
     /// Get a constant reference to an HTTP version.
     ///
@@ -70,6 +67,11 @@ impl Version {
             .copied()
             .ok_or(InvalidHTTPVersionError::new(line))
     }
+
+    /// All allowed versions.
+    #[doc(hidden)]
+    const ALLOWED_VERSIONS: &'static [&'static Self] =
+        &[Self::HTTP_1, Self::HTTP_1_1, Self::HTTP_2, Self::HTTP_3];
 }
 
 #[derive(Debug, Clone)]
