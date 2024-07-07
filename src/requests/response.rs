@@ -6,6 +6,24 @@ use std::path::Path;
 
 use super::{Status, Version};
 
+/// HTTP response.
+///
+/// # How to use it?
+///
+/// ```rust
+/// use std::net::TcpListener;
+///
+/// use crate::requests::{Request, Status};
+///
+/// let listener = TcpListener::bind("127.0.0.1:8000").unwrap();
+///
+/// for stream in listener.incoming() {
+///     let request = Request::from_stream(stream.unwrap());
+///
+///     let response = request.make_response_with_status(Status::OK);
+///     response.send();
+/// }
+/// ```
 #[derive(Debug)]
 pub struct Response {
     #[doc(hidden)]
@@ -32,7 +50,21 @@ impl Display for Response {
 }
 
 impl Response {
-    pub fn new(version: &'static Version, status: &'static Status, stream: TcpStream) -> Self {
+    /// Create the response with the version, status and the stream used to send the
+    /// response.
+    ///
+    /// # Returns
+    ///
+    /// Returns a new instance of [`Response`].
+    ///
+    /// # How to create it?
+    ///
+    /// Check [`Request::make_response_with_status()`][make_response_with_status].
+    ///
+    /// <!-- References -->
+    ///
+    /// [make_response_with_status]: super::Request::make_response_with_status()
+    pub fn new(version: &'static Version, status: &'static Status, stream: TcpStream) -> Response {
         Self {
             version,
             contents: String::new(),
@@ -41,13 +73,60 @@ impl Response {
         }
     }
 
-    pub fn add_file(&mut self, path: impl AsRef<Path>) -> Result<&mut Self, std::io::Error> {
+    /// Add the content of the file to the [`Response`].
+    ///
+    /// # Returns
+    ///
+    /// Returns the instance [`Response`], or [`std::io::Error`] if an error happened
+    /// during the read of the file.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use std::net::TcpListener;
+    /// use std::path::Path;
+    ///
+    /// use crate::requests::{Request, Status};
+    ///
+    /// let listener = TcpListener::bind("127.0.0.1:8000").unwrap();
+    ///
+    /// for stream in listener.incoming() {
+    ///     let request = Request::from_stream(stream.unwrap());
+    ///
+    ///     let response = request.make_response_with_status(Status::OK);
+    ///     response.add_file(Path::new("file_to_be_loaded"));
+    ///     response.send();
+    /// }
+    /// ```
+    pub fn add_file(&mut self, path: impl AsRef<Path>) -> Result<&mut Response, std::io::Error> {
         fs::read_to_string(path.as_ref()).map(|contents| {
             self.contents += &contents.to_owned();
             self
         })
     }
 
+    /// Send the response to the stream [`TcpStream`].
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use std::net::TcpListener;
+    ///
+    /// use crate::requests::{Request, Status};
+    ///
+    /// let listener = TcpListener::bind("127.0.0.1:8000").unwrap();
+    ///
+    /// for stream in listener.incoming() {
+    ///     let request = Request::from_stream(stream.unwrap());
+    ///
+    ///     let response = request.make_response_with_status(Status::OK);
+    ///     response.send();
+    /// }
+    /// ```
+    ///
+    /// # Panics
+    ///
+    /// - If the [`TcpStream::write_all`] panics.
     pub fn send(&mut self) {
         self.stream.write_all(self.to_string().as_bytes()).unwrap()
     }
