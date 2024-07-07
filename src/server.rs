@@ -2,8 +2,6 @@ use std::io::ErrorKind::WouldBlock;
 use std::net::TcpListener;
 use std::sync::{Arc, Mutex};
 
-use ctrlc;
-
 pub use crate::requests::{Debug, Method};
 use crate::requests::{HTTPListener, RequestHandler};
 
