@@ -11,6 +11,8 @@ mod listener;
 mod method;
 mod request;
 mod response;
+
+/// Module contains the HTTP [`Status`].
 mod status;
 
 /// Module contains the HTTP [`Version`].

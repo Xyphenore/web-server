@@ -1,6 +1,18 @@
 use std::cmp::Ordering;
 use std::fmt::{Debug, Display, Formatter};
 
+/// HTTP status [MDN Status](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status).
+///
+/// # How to use it?
+///
+/// ```rust
+/// use crate::requests::Status;
+///
+/// let ok = Status::OK;
+/// let not_found = Status::NOT_FOUND;
+///
+/// // You use it like an enumeration.
+/// ```
 #[derive(Debug, Clone)]
 pub struct Status {
     #[doc(hidden)]
@@ -44,11 +56,18 @@ impl Display for Status {
 }
 
 impl Status {
-    pub const OK: &'static Self = &Self {
+    /// HTTP status `OK`.
+    ///
+    /// [MDN - 200 OK](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/200)
+    pub const OK: &'static Status = &Self {
         code: 200,
         name: "OK",
     };
-    pub const NOT_FOUND: &'static Self = &Self {
+
+    /// HTTP status `NOT FOUND`.
+    ///
+    /// [MDN - 404 NOT FOUND](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404)
+    pub const NOT_FOUND: &'static Status = &Self {
         code: 404,
         name: "NOT FOUND",
     };
