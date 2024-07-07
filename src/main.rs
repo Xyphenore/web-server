@@ -18,7 +18,7 @@ static DEBUG: bool = false;
 ///
 /// # Panics
 ///
-/// If [`WebServer::serve()`] or [`WebServer::add_listener()`] panic.
+/// If any method from [`WebServer::serve()`] or [`WebServer::add_listener()`] panic.
 fn main() {
     WebServer::new(2, Debug::from(DEBUG))
         .add_listener(Method::get("/").unwrap(), get_index)
