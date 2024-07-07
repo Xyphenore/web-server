@@ -22,6 +22,15 @@ pub enum Debug {
     False,
 }
 
+impl Debug {
+    pub fn from(value: bool) -> Self {
+        match value {
+            true => Debug::True,
+            false => Debug::False,
+        }
+    }
+}
+
 impl RequestHandler {
     pub fn new(amount_threads: usize, debug: Debug) -> RequestHandler {
         RequestHandler {
