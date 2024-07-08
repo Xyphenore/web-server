@@ -1,4 +1,3 @@
-use std::cmp::Ordering;
 use std::fmt::{Debug, Display, Formatter};
 
 /// HTTP status [MDN Status](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status).
@@ -13,40 +12,12 @@ use std::fmt::{Debug, Display, Formatter};
 ///
 /// // You use it like an enumeration.
 /// ```
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Hash, PartialEq, Eq, Ord, PartialOrd)]
 pub struct Status {
     #[doc(hidden)]
     code: u16,
     #[doc(hidden)]
     name: &'static str,
-}
-
-impl PartialOrd for Status {
-    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        self.code.partial_cmp(&other.code)
-    }
-
-    fn lt(&self, other: &Self) -> bool {
-        self.code < other.code
-    }
-
-    fn le(&self, other: &Self) -> bool {
-        self.code <= other.code
-    }
-
-    fn gt(&self, other: &Self) -> bool {
-        self.code > other.code
-    }
-
-    fn ge(&self, other: &Self) -> bool {
-        self.code >= other.code
-    }
-}
-
-impl PartialEq for Status {
-    fn eq(&self, other: &Self) -> bool {
-        self.code == other.code
-    }
 }
 
 impl Display for Status {

@@ -37,27 +37,11 @@ use crate::requests::{HTTPListener, Request, Response};
 /// ```
 #[derive(Debug)]
 pub struct Job {
-    #[doc(hidden)]
-    request: Request,
-    #[doc(hidden)]
-    listener: HTTPListener,
+    pub request: Request,
+    pub listener: HTTPListener,
 }
 
 impl Job {
-    /// Create a new [`Job`] with the [`Request`] and the [`HTTPListener`].
-    ///
-    /// # Parameters
-    ///
-    /// - `request`: The request to process in the listener.
-    /// - `listener`: The function that will process the request.
-    ///
-    /// # Returns
-    ///
-    /// Returns a new instance of [`Job`].
-    pub fn new(request: Request, listener: HTTPListener) -> Job {
-        Self { request, listener }
-    }
-
     /// Call the listener with the request.
     ///
     /// # Returns

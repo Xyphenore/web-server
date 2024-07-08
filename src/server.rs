@@ -9,7 +9,7 @@ use std::path::Path;
 use std::sync::{Arc, Mutex};
 
 pub use crate::requests::Method;
-use crate::requests::{HTTPListener, Request, Response, Status};
+use crate::requests::{HTTPListener, Job, Request, Response, Status};
 use crate::threads::WorkerPool;
 
 /// The web server.
@@ -185,7 +185,7 @@ impl WebServer {
     /// cf.[`WorkerPool::execute()`].
     #[doc(hidden)]
     fn handle(&mut self, stream: TcpStream) {
-        let request = Request::from_stream(stream);
+        let request = Request::from(stream);
 
         if self.debug {
             println!("Request {}: {request:#?}", self.cpt);
@@ -194,11 +194,14 @@ impl WebServer {
 
         let listener = self
             .listeners
-            .get(&request.method)
-            .unwrap_or(&(WebServer::not_found_handler as HTTPListener));
+            .get(request.method())
+            .unwrap_or(&(Self::not_found_handler as HTTPListener));
 
         self.workers
-            .execute(request.make_job_with_listener(*listener))
+            .execute(Job {
+                request,
+                listener: *listener,
+            })
             .unwrap();
     }
 
@@ -215,7 +218,7 @@ impl WebServer {
     /// - If [`Response::add_file()`] returns an error.
     #[doc(hidden)]
     fn not_found_handler(request: Request) -> Response {
-        let mut response = request.make_response_with_status(Status::NOT_FOUND);
+        let mut response = Response::from((request, Status::NOT_FOUND));
         response
             .add_file(Path::new("templates/not_found.html"))
             .unwrap();
@@ -231,9 +234,9 @@ pub enum Debug {
     False,
 }
 
-impl Debug {
+impl From<bool> for Debug {
     /// Get the [`enum@Debug`] enumeration value from the bool value.
-    pub fn from(value: bool) -> Debug {
+    fn from(value: bool) -> Debug {
         match value {
             true => Self::True,
             false => Self::False,

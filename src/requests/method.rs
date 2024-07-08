@@ -6,6 +6,8 @@ use std::fmt::{Debug, Display, Formatter};
 ///
 /// # How to use it?
 ///
+/// # Class method
+///
 /// ```rust
 /// use crate::requests::Method;
 ///
@@ -20,12 +22,23 @@ use std::fmt::{Debug, Display, Formatter};
 /// let connect_index = Method::connect("/");
 /// ```
 ///
-/// ```rust
+/// # From a string
+///
+/// ```
 /// use crate::requests::Method;
 ///
-/// let line = "GET /";
+/// let method = Method::try_from("GET /");
+/// assert!(method.is_ok());
+/// if let Ok(method) = method {
+///     assert_eq!(method.to_string(), "GET /");
+/// }
+/// ```
 ///
-/// let method = Method::from_line(line);
+/// ```
+/// use crate::requests::Method;
+///
+/// let method = Method::try_from("NOT /");
+/// assert!(method.is_err());
 /// ```
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Method {
@@ -250,26 +263,8 @@ impl Method {
     /// # Returns
     ///
     /// Returns the instance of [`Method`], or the error if `line` is invalid.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use crate::requests::Method;
-    ///
-    /// let method = Method::from_line("GET /");
-    /// assert!(method.is_ok());
-    /// if let Ok(method) = method {
-    ///     assert_eq!(method.to_string(), "GET /");
-    /// }
-    /// ```
-    ///
-    /// ```
-    /// use crate::requests::Method;
-    ///
-    /// let method = Method::from_line("NOT /");
-    /// assert!(method.is_err());
-    /// ```
-    pub fn from_line(line: impl AsRef<str>) -> Result<Method, Box<dyn InvalidMethodPartError>> {
+    #[doc(hidden)]
+    fn try_from_line(line: impl AsRef<str>) -> Result<Method, Box<dyn InvalidMethodPartError>> {
         let parts: Vec<_> = line.as_ref().split(' ').collect();
         let method = parts[0];
         let uri = parts[1];
@@ -340,7 +335,7 @@ impl Method {
     fn check_uri(uri: impl AsRef<str>) -> Result<(), InvalidURIError> {
         let uri = uri.as_ref();
         if uri.trim().is_empty() {
-            return Err(InvalidURIError::new(uri));
+            return Err(InvalidURIError::from(uri));
         }
 
         Ok(())
@@ -361,17 +356,68 @@ impl Method {
     fn check_method(method: impl AsRef<str>) -> Result<(), InvalidMethodError> {
         let method = method.as_ref();
         if !Self::ALLOWED_METHODS.contains(&method) {
-            return Err(InvalidMethodError::new(method));
+            return Err(InvalidMethodError::from(method));
         }
 
         Ok(())
     }
 }
 
-/// Indicate that [`Method::from_line()`] reads an invalid part (URI, Method).
-pub trait InvalidMethodPartError: Debug {}
+impl TryFrom<&str> for Method {
+    type Error = Box<dyn InvalidMethodPartError>;
 
-/// Indicate that [`Method::from_line()`] reads an invalid URI.
+    /// Create a new instance of [`Method`] from the line.
+    ///
+    /// # Parameters
+    ///
+    /// - `line`: The line must start like: `METHOD URI`.
+    ///
+    /// # Returns
+    ///
+    /// Returns the instance of [`Method`], or the error if `line` is invalid.
+    fn try_from(value: &str) -> Result<Method, Self::Error> {
+        Self::try_from_line(value)
+    }
+}
+
+impl TryFrom<String> for Method {
+    type Error = Box<dyn InvalidMethodPartError>;
+
+    /// Create a new instance of [`Method`] from the line.
+    ///
+    /// # Parameters
+    ///
+    /// - `line`: The line must start like: `METHOD URI`.
+    ///
+    /// # Returns
+    ///
+    /// Returns the instance of [`Method`], or the error if `line` is invalid.
+    fn try_from(value: String) -> Result<Method, Self::Error> {
+        Self::try_from_line(value)
+    }
+}
+
+impl TryFrom<&String> for Method {
+    type Error = Box<dyn InvalidMethodPartError>;
+
+    /// Create a new instance of [`Method`] from the line.
+    ///
+    /// # Parameters
+    ///
+    /// - `line`: The line must start like: `METHOD URI`.
+    ///
+    /// # Returns
+    ///
+    /// Returns the instance of [`Method`], or the error if `line` is invalid.
+    fn try_from(value: &String) -> Result<Method, Self::Error> {
+        Self::try_from_line(value)
+    }
+}
+
+/// Indicate that [`Method::try_from()`] reads an invalid part (URI, Method).
+pub trait InvalidMethodPartError: Debug + Display {}
+
+/// Indicate that [`Method::try_from()`] reads an invalid URI.
 #[derive(Debug, Clone)]
 pub struct InvalidURIError {
     #[doc(hidden)]
@@ -384,26 +430,22 @@ impl Display for InvalidURIError {
     }
 }
 
-impl InvalidURIError {
+impl From<&str> for InvalidURIError {
     /// Create a new instance of [`InvalidURIError`] with the invalid entry.
-    ///
-    /// # Parameters
-    ///
-    /// - `entry`: The invalid entry, like a [`String`] or [`&str`]
     ///
     /// # Returns
     ///
     /// Returns a new instance of [`InvalidURIError`].
-    fn new(entry: impl AsRef<str>) -> InvalidURIError {
+    fn from(value: &str) -> InvalidURIError {
         Self {
-            entry: entry.as_ref().to_string(),
+            entry: value.to_owned(),
         }
     }
 }
 
 impl InvalidMethodPartError for InvalidURIError {}
 
-/// Indicate that [`Method::from_line()`] reads an invalid method verb.
+/// Indicate that [`Method::try_from()`] reads an invalid method verb.
 #[derive(Debug, Clone)]
 pub struct InvalidMethodError {
     #[doc(hidden)]
@@ -416,19 +458,15 @@ impl Display for InvalidMethodError {
     }
 }
 
-impl InvalidMethodError {
+impl From<&str> for InvalidMethodError {
     /// Create a new instance of [`InvalidMethodError`] with the invalid entry.
-    ///
-    /// # Parameters
-    ///
-    /// - `entry`: The invalid entry, like a [`String`] or [`&str`]
     ///
     /// # Returns
     ///
     /// Returns a new instance of [`InvalidMethodError`].
-    fn new(entry: impl AsRef<str>) -> InvalidMethodError {
+    fn from(value: &str) -> InvalidMethodError {
         Self {
-            entry: entry.as_ref().to_string(),
+            entry: value.to_owned(),
         }
     }
 }

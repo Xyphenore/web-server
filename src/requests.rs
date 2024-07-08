@@ -20,11 +20,11 @@ mod job;
 /// # Errors
 ///
 /// - [`InvalidMethodPartError`](method::InvalidMethodPartError): Indicate that
-/// [`Method::from_line()`] reads an invalid part (URI, Method).
+/// [`Method::try_from()`] reads an invalid part (URI, Method).
 /// - [`InvalidMethodError`](method::InvalidMethodError): Indicate that
-/// [`Method::from_line()`] reads an invalid method verb.
+/// [`Method::try_from()`] reads an invalid method verb.
 /// - [`InvalidURIError`](method::InvalidURIError): Indicate that
-/// [`Method::from_line()`] reads an invalid URI.
+/// [`Method::try_from()`] reads an invalid URI.
 mod method;
 
 /// Module contains the [`Request`] structure.
@@ -41,5 +41,5 @@ mod status;
 /// # Errors
 ///
 /// - [`InvalidHTTPVersionError`](version::InvalidHTTPVersionError): Indicate that
-/// [`Version::from()`] reads an invalid HTTP version.
+/// [`Version::try_from()`] reads an invalid HTTP version.
 mod version;

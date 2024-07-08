@@ -4,7 +4,7 @@ use std::io::Write;
 use std::net::TcpStream;
 use std::path::Path;
 
-use super::{Status, Version};
+use super::{Request, Status, Version};
 
 /// HTTP response.
 ///
@@ -27,7 +27,7 @@ use super::{Status, Version};
 #[derive(Debug)]
 pub struct Response {
     #[doc(hidden)]
-    version: &'static Version,
+    version: Version,
     #[doc(hidden)]
     status: &'static Status,
     #[doc(hidden)]
@@ -50,29 +50,6 @@ impl Display for Response {
 }
 
 impl Response {
-    /// Create the response with the version, status and the stream used to send the
-    /// response.
-    ///
-    /// # Returns
-    ///
-    /// Returns a new instance of [`Response`].
-    ///
-    /// # How to create it?
-    ///
-    /// Check [`Request::make_response_with_status()`][make_response_with_status].
-    ///
-    /// <!-- References -->
-    ///
-    /// [make_response_with_status]: super::Request::make_response_with_status()
-    pub fn new(version: &'static Version, status: &'static Status, stream: TcpStream) -> Response {
-        Self {
-            version,
-            contents: String::new(),
-            status,
-            stream,
-        }
-    }
-
     /// Add the content of the file to the [`Response`].
     ///
     /// # Returns
@@ -129,5 +106,24 @@ impl Response {
     /// - If the [`TcpStream::write_all`] panics.
     pub fn send(&mut self) {
         self.stream.write_all(self.to_string().as_bytes()).unwrap()
+    }
+}
+
+impl From<(Request, &'static Status)> for Response {
+    /// Create a [`Response`] with a [`Status`] from the [`Request`] and consume it.
+    ///
+    /// # Returns
+    ///
+    /// Returns a new instance of [`Response`].
+    fn from(value: (Request, &'static Status)) -> Response {
+        let request = value.0;
+        let (_, version, stream) = request.take_content();
+
+        Self {
+            version,
+            contents: String::new(),
+            status: value.1,
+            stream,
+        }
     }
 }

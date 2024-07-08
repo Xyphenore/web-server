@@ -1,7 +1,7 @@
 use std::io::{BufRead, BufReader};
 use std::net::TcpStream;
 
-use super::{HTTPListener, Job, Method, Response, Status, Version};
+use super::{Method, Version};
 
 /// HTTP request.
 ///
@@ -15,23 +15,35 @@ use super::{HTTPListener, Job, Method, Response, Status, Version};
 /// let listener = TcpListener::bind("127.0.0.1:8000").unwrap();
 ///
 /// for stream in listener.incoming() {
-///     let request = Request::from_stream(stream.unwrap());
+///     let request = Request::from(stream.unwrap());
 ///
 ///     // Process the request after.
 /// }
 /// ```
 #[derive(Debug)]
 pub struct Request {
-    pub method: Method,
     #[doc(hidden)]
-    version: &'static Version,
+    method: Method,
+    #[doc(hidden)]
+    version: Version,
     /// Other lines read from the stream.
-    pub _other_lines: Vec<String>,
+    #[doc(hidden)]
+    _other_lines: Vec<String>,
     #[doc(hidden)]
     stream: TcpStream,
 }
 
 impl Request {
+    pub fn method(&self) -> &Method {
+        &self.method
+    }
+
+    pub fn take_content(self) -> (Method, Version, TcpStream) {
+        (self.method, self.version, self.stream)
+    }
+}
+
+impl From<TcpStream> for Request {
     /// Create a [`Request`] from a [`TcpStream`].
     ///
     /// # Returns
@@ -43,8 +55,8 @@ impl Request {
     /// - If the read of `stream` fails.
     /// - If the read of the method from the `stream`.
     /// - If the read of the version from the `stream`.
-    pub fn from_stream(stream: TcpStream) -> Request {
-        let buffer_reader = BufReader::new(&stream);
+    fn from(value: TcpStream) -> Request {
+        let buffer_reader = BufReader::new(&value);
         let mut http_request: Vec<_> = buffer_reader
             .lines()
             .map(|result| result.unwrap())
@@ -52,7 +64,7 @@ impl Request {
             .collect();
 
         let first_line = http_request.remove(0);
-        let method = Method::from_line(&first_line).unwrap();
+        let method = Method::try_from(&first_line).unwrap();
 
         let mut parts = first_line.split(' ');
         // Drop the method verb
@@ -62,27 +74,9 @@ impl Request {
 
         Request {
             method,
-            version: Version::from(String::from_iter(parts)).unwrap(),
+            version: Version::try_from(String::from_iter(parts)).unwrap(),
             _other_lines: http_request,
-            stream,
+            stream: value,
         }
-    }
-
-    /// Create a [`Response`] with a [`Status`] from the [`Request`] and consume it.
-    ///
-    /// # Returns
-    ///
-    /// Returns a new instance of [`Response`].
-    pub fn make_response_with_status(self, status: &'static Status) -> Response {
-        Response::new(self.version, status, self.stream)
-    }
-
-    /// Create a [`Job`] with a [`HTTPListener`] from the [`Request`] and consume it.
-    ///
-    /// # Returns
-    ///
-    /// Returns a new instance of [`Job`].
-    pub fn make_job_with_listener(self, listener: HTTPListener) -> Job {
-        Job::new(self, listener)
     }
 }
