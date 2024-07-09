@@ -145,7 +145,7 @@ impl WebServer {
     /// - If the incoming [`TcpStream`] cannot enter into the blocking mode.
     /// - If the process of the incoming stream, panics.
     pub fn serve(&mut self) {
-        let listener = TcpListener::bind("127.0.0.1:8000").unwrap();
+        let listener = TcpListener::bind(SocketAddrV4::new(Ipv4Addr::LOCALHOST, 8080)).unwrap();
         listener
             .set_nonblocking(true)
             .expect("Cannot make the TCP listener to non-blocking mode.");
