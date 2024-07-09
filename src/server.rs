@@ -2,15 +2,16 @@
 //!
 //! To see how to create the web server, go to the class [`WebServer`].
 
-pub use crate::requests::Method;
-use crate::requests::{HTTPListener, Job, Request, Response, Status};
-use crate::threads::WorkerPool;
 use std::collections::HashMap;
 use std::io::ErrorKind::WouldBlock;
 use std::net::{Ipv4Addr, SocketAddrV4, TcpListener, TcpStream};
 use std::num::NonZeroUsize;
 use std::path::Path;
 use std::sync::{Arc, Mutex};
+
+pub use crate::requests::Method;
+use crate::requests::{HTTPListener, Job, Request, Response, Status};
+use crate::threads::WorkerPool;
 
 /// The web server.
 ///
@@ -145,7 +146,7 @@ impl WebServer {
     /// - If the incoming [`TcpStream`] cannot enter into the blocking mode.
     /// - If the process of the incoming stream, panics.
     pub fn serve(&mut self) {
-        let listener = TcpListener::bind(SocketAddrV4::new(Ipv4Addr::LOCALHOST, 8080)).unwrap();
+        let listener = TcpListener::bind(SocketAddrV4::new(Ipv4Addr::LOCALHOST, 8000)).unwrap();
         listener
             .set_nonblocking(true)
             .expect("Cannot make the TCP listener to non-blocking mode.");
