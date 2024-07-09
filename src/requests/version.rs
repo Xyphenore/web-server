@@ -9,10 +9,10 @@ use std::str::FromStr;
 /// ```rust
 /// use crate::requests::Version;
 ///
-/// let version_1 = Version::HTTP_1;
-/// let version_1_1 = Version::HTTP_1_1;
-/// let version_2 = Version::HTTP_2;
-/// let version_3 = Version::HTTP_3;
+/// let version_1 = Version::Http1;
+/// let version_1_1 = Version::Http1_1;
+/// let version_2 = Version::Http2;
+/// let version_3 = Version::Http3;
 ///
 /// // You can use it like an enumeration.
 /// ```
@@ -25,108 +25,51 @@ use std::str::FromStr;
 /// let version = Version::from(line);
 /// ```
 #[derive(Debug, Clone, PartialEq, PartialOrd, Eq, Ord, Hash, Copy)]
-pub struct Version {
-    #[doc(hidden)]
-    major: char,
-    #[doc(hidden)]
-    minor: char,
-}
-
-impl Version {
+pub enum Version {
     /// HTTP Version 1
     ///
     /// [MDN - HTTP1](https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/Evolution_of_HTTP#http1.0_%E2%80%93_building_extensibility)
-    pub const HTTP_1: Version = Self {
-        major: '1',
-        minor: '0',
-    };
+    Http1,
 
     /// HTTP Version 1.1
     ///
     /// [MDN - HTTP1.1](https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/Evolution_of_HTTP#http1.1_%E2%80%93_the_standardized_protocol)
-    pub const HTTP_1_1: Version = Self {
-        major: '1',
-        minor: '1',
-    };
+    Http1_1,
 
     /// HTTP Version 2
     ///
     /// [MDN - HTTP2](https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/Evolution_of_HTTP#http2_%E2%80%93_a_protocol_for_greater_performance)
-    pub const HTTP_2: Version = Self {
-        major: '2',
-        minor: '0',
-    };
+    Http2,
 
     /// HTTP Version 3
     ///
     /// [MDN - HTTP3](https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/Evolution_of_HTTP#http3_-_http_over_quic)
-    pub const HTTP_3: Version = Self {
-        major: '3',
-        minor: '0',
-    };
+    Http3,
+}
 
-    /// Get a constant reference to an HTTP version.
-    ///
-    /// # Parameters
-    ///
-    /// - `line`: The line must be in the form: `HTTP/{version}`.
-    /// `{version}` can be like `major` or `major.minor`.
-    /// A [`String`] or [`&str`].
-    ///
-    /// # Returns
-    ///
-    /// Returns the constant to the good [`Version`], or a
-    /// [`InvalidHTTPVersionError`] if `line` does not respect the pattern.
-    ///
-    /// # Examples
-    ///
-    /// ```rust
-    /// let version = Version::from("HTTP/1");
-    /// assert!(version.is_ok());
-    ///
-    /// if let Some(version) = version {
-    ///     assert_eq!(version.to_string(), "HTTP/1");
-    /// }
-    /// ```
-    ///
-    /// ```rust
-    /// let version = Version::from("1.0");
-    /// assert!(version.is_err());
-    ///
-    /// if let Err(error) = version {
-    ///     assert_eq!(error, "Invalid HTTP version: '1.0'");
-    /// }
-    /// ```
-    #[doc(hidden)]
-    fn try_from_line(line: impl AsRef<str>) -> Result<Version, InvalidHTTPVersionError> {
-        let upper_line = line.as_ref().to_uppercase();
-
-        Self::ALLOWED_VERSIONS
-            .iter()
-            .find(|version| version.to_string() == upper_line)
-            .cloned()
-            .ok_or(InvalidHTTPVersionError::from(line.as_ref()))
-    }
-
+impl Version {
     /// All allowed versions.
     #[doc(hidden)]
     const ALLOWED_VERSIONS: &'static [Self] =
-        &[Self::HTTP_1, Self::HTTP_1_1, Self::HTTP_2, Self::HTTP_3];
+        &[Self::Http1, Self::Http1_1, Self::Http2, Self::Http3];
 }
 
 impl Display for Version {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        if '0' != self.minor {
-            write!(f, "HTTP/{}.{}", self.major, self.minor)
-        } else {
-            write!(f, "HTTP/{}", self.major)
-        }
+        let version = match self {
+            Self::Http1 => "1",
+            Self::Http1_1 => "1.1",
+            Self::Http2 => "2",
+            Self::Http3 => "3",
+        };
+
+        write!(f, "HTTP/{}", version)
     }
 }
 
 impl Default for Version {
-    fn default() -> Self {
-        Self::HTTP_1_1
+    fn default() -> Version {
+        Self::Http1_1
     }
 }
 
@@ -165,7 +108,13 @@ impl FromStr for Version {
     /// }
     /// ```
     fn from_str(s: &str) -> Result<Version, Self::Err> {
-        Self::try_from(s)
+        let upper_line = s.to_uppercase();
+
+        Self::ALLOWED_VERSIONS
+            .iter()
+            .find(|version| version.to_string() == upper_line)
+            .ok_or(InvalidHTTPVersionError::from(s))
+            .copied()
     }
 }
 
@@ -204,7 +153,7 @@ impl TryFrom<&str> for Version {
     /// }
     /// ```
     fn try_from(value: &str) -> Result<Version, Self::Error> {
-        Self::try_from_line(value)
+        Self::from_str(value)
     }
 }
 
@@ -243,7 +192,7 @@ impl TryFrom<String> for Version {
     /// }
     /// ```
     fn try_from(value: String) -> Result<Version, Self::Error> {
-        Self::try_from_line(value)
+        Self::from_str(&value)
     }
 }
 
@@ -282,7 +231,7 @@ impl TryFrom<&String> for Version {
     /// }
     /// ```
     fn try_from(value: &String) -> Result<Version, Self::Error> {
-        Self::try_from_line(value)
+        Self::from_str(value)
     }
 }
 
