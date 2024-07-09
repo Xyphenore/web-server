@@ -232,7 +232,7 @@ impl WebServer {
 }
 
 impl Default for WebServer {
-    /// Create the [`WebServer`] with one [`Worker`](crate::threads::worker::Worker)
+    /// Create the [`WebServer`] with one worker
     /// and the [`enum@Debug`] to false.
     ///
     /// # Returns
