@@ -1,5 +1,7 @@
 // https://doc.rust-lang.org/book/ch20-00-final-project-a-web-server.ht
 
+#![doc(issue_tracker_base_url = "https://github.com/Xyphenore/web-server/issues/")]
+
 use crate::routes::{index::get as get_index, slow_request::get as get_slow_request};
 use crate::server::{Debug, Method, WebServer};
 
