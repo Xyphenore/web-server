@@ -22,7 +22,7 @@ use crate::requests::{Request, Response, Status};
 ///
 /// [add_listener]: crate::server::WebServer::add_listener()
 pub fn get(request: Request) -> Response {
-    let mut response = Response::from((request, Status::OK));
+    let mut response = Response::from((request, Status::Ok));
     response
         .add_file(Path::new("templates/index.html"))
         .unwrap();

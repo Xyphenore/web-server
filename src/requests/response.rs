@@ -29,7 +29,7 @@ pub struct Response {
     #[doc(hidden)]
     version: Version,
     #[doc(hidden)]
-    status: &'static Status,
+    status: Status,
     #[doc(hidden)]
     contents: String,
     #[doc(hidden)]
@@ -109,13 +109,13 @@ impl Display for Response {
     }
 }
 
-impl From<(Request, &'static Status)> for Response {
+impl From<(Request, Status)> for Response {
     /// Create a [`Response`] with a [`Status`] from the [`Request`] and consume it.
     ///
     /// # Returns
     ///
     /// Returns a new instance of [`Response`].
-    fn from(value: (Request, &'static Status)) -> Response {
+    fn from(value: (Request, Status)) -> Response {
         let request = value.0;
         let (_, version, stream) = request.take_content();
 
