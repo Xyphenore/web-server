@@ -324,7 +324,7 @@ impl Method {
         let uri = uri.as_ref();
 
         Self::check_method(method)
-            .map_err(|_| panic!("The method {} is not allowed.", method))
+            .map_err(|_| unreachable!("The method {} is not allowed.", method))
             .and(Self::check_uri(uri))
             .and(Ok(Self {
                 method: method.to_uppercase(),
