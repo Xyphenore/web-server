@@ -230,10 +230,31 @@ impl WebServer {
     }
 }
 
+impl Default for WebServer {
+    /// Create the [`WebServer`] with one [`Worker`](crate::threads::worker::Worker)
+    /// and the [`enum@Debug`] to false.
+    ///
+    /// # Returns
+    ///
+    /// Returns a new instance of [`WebServer`].
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use crate::server::WebServer;
+    ///
+    /// let server = WebServer::default();
+    /// ```
+    fn default() -> Self {
+        Self::new(NonZeroUsize::new(1).unwrap(), Debug::default())
+    }
+}
+
 /// Indicate if the debug mode is activated on the [`WebServer`].
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub enum Debug {
     True,
+    #[default]
     False,
 }
 

@@ -123,6 +123,12 @@ impl Display for Version {
     }
 }
 
+impl Default for Version {
+    fn default() -> Self {
+        Self::HTTP_1_1
+    }
+}
+
 impl FromStr for Version {
     type Err = InvalidHTTPVersionError;
 

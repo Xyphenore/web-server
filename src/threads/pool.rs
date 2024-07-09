@@ -95,3 +95,14 @@ impl Drop for WorkerPool {
         }
     }
 }
+
+impl Default for WorkerPool {
+    /// Create a new WorkerPool with only one worker.
+    ///
+    /// # Returns
+    ///
+    /// Returns a new instance of [`WorkerPool`].
+    fn default() -> Self {
+        Self::new(NonZeroUsize::new(1).unwrap())
+    }
+}
