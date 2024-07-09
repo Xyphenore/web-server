@@ -77,7 +77,7 @@ impl Method {
     ///
     /// # Returns
     ///
-    /// Returns the new instance [`Method`], or [`InvalidURIError`] if `uri` is blank.
+    /// Returns the new instance [`Method`], or [`InvalidMethodError`] if `uri` is blank.
     ///
     /// # Examples
     ///
@@ -86,7 +86,7 @@ impl Method {
     ///
     /// let get_index = Method::get("/");
     /// ```
-    pub fn get(uri: impl AsRef<str>) -> Result<Method, InvalidURIError> {
+    pub fn get(uri: impl AsRef<str>) -> Result<Method, InvalidMethodError> {
         Self::build("GET", uri)
     }
 
@@ -99,7 +99,7 @@ impl Method {
     ///
     /// # Returns
     ///
-    /// Returns the new instance [`Method`], or [`InvalidURIError`] if `uri` is blank.
+    /// Returns the new instance [`Method`], or [`InvalidMethodError`] if `uri` is blank.
     ///
     /// # Examples
     ///
@@ -108,7 +108,7 @@ impl Method {
     ///
     /// let post_index = Method::post("/");
     /// ```
-    pub fn post(uri: impl AsRef<str>) -> Result<Method, InvalidURIError> {
+    pub fn post(uri: impl AsRef<str>) -> Result<Method, InvalidMethodError> {
         Self::build("POST", uri)
     }
 
@@ -121,7 +121,7 @@ impl Method {
     ///
     /// # Returns
     ///
-    /// Returns the new instance [`Method`], or [`InvalidURIError`] if `uri` is blank.
+    /// Returns the new instance [`Method`], or [`InvalidMethodError`] if `uri` is blank.
     ///
     /// # Examples
     ///
@@ -130,7 +130,7 @@ impl Method {
     ///
     /// let update_index = Method::update("/");
     /// ```
-    pub fn update(uri: impl AsRef<str>) -> Result<Method, InvalidURIError> {
+    pub fn update(uri: impl AsRef<str>) -> Result<Method, InvalidMethodError> {
         Self::build("UPDATE", uri)
     }
 
@@ -143,7 +143,7 @@ impl Method {
     ///
     /// # Returns
     ///
-    /// Returns the new instance [`Method`], or [`InvalidURIError`] if `uri` is blank.
+    /// Returns the new instance [`Method`], or [`InvalidMethodError`] if `uri` is blank.
     ///
     /// # Examples
     ///
@@ -152,7 +152,7 @@ impl Method {
     ///
     /// let patch_index = Method::patch("/");
     /// ```
-    pub fn patch(uri: impl AsRef<str>) -> Result<Method, InvalidURIError> {
+    pub fn patch(uri: impl AsRef<str>) -> Result<Method, InvalidMethodError> {
         Self::build("PATCH", uri)
     }
 
@@ -165,7 +165,7 @@ impl Method {
     ///
     /// # Returns
     ///
-    /// Returns the new instance [`Method`], or [`InvalidURIError`] if `uri` is blank.
+    /// Returns the new instance [`Method`], or [`InvalidMethodError`] if `uri` is blank.
     ///
     /// # Examples
     ///
@@ -174,7 +174,7 @@ impl Method {
     ///
     /// let delete_index = Method::delete("/");
     /// ```
-    pub fn delete(uri: impl AsRef<str>) -> Result<Method, InvalidURIError> {
+    pub fn delete(uri: impl AsRef<str>) -> Result<Method, InvalidMethodError> {
         Self::build("DELETE", uri)
     }
 
@@ -187,7 +187,7 @@ impl Method {
     ///
     /// # Returns
     ///
-    /// Returns the new instance [`Method`], or [`InvalidURIError`] if `uri` is blank.
+    /// Returns the new instance [`Method`], or [`InvalidMethodError`] if `uri` is blank.
     ///
     /// # Examples
     ///
@@ -196,7 +196,7 @@ impl Method {
     ///
     /// let head_index = Method::head("/");
     /// ```
-    pub fn head(uri: impl AsRef<str>) -> Result<Method, InvalidURIError> {
+    pub fn head(uri: impl AsRef<str>) -> Result<Method, InvalidMethodError> {
         Self::build("HEAD", uri)
     }
 
@@ -209,7 +209,7 @@ impl Method {
     ///
     /// # Returns
     ///
-    /// Returns the new instance [`Method`], or [`InvalidURIError`] if `uri` is blank.
+    /// Returns the new instance [`Method`], or [`InvalidMethodError`] if `uri` is blank.
     ///
     /// # Examples
     ///
@@ -218,7 +218,7 @@ impl Method {
     ///
     /// let options_index = Method::options("/");
     /// ```
-    pub fn options(uri: impl AsRef<str>) -> Result<Method, InvalidURIError> {
+    pub fn options(uri: impl AsRef<str>) -> Result<Method, InvalidMethodError> {
         Self::build("OPTIONS", uri)
     }
 
@@ -231,7 +231,7 @@ impl Method {
     ///
     /// # Returns
     ///
-    /// Returns the new instance [`Method`], or [`InvalidURIError`] if `uri` is blank.
+    /// Returns the new instance [`Method`], or [`InvalidMethodError`] if `uri` is blank.
     ///
     /// # Examples
     ///
@@ -240,7 +240,7 @@ impl Method {
     ///
     /// let connect_index = Method::connect("/");
     /// ```
-    pub fn connect(uri: impl AsRef<str>) -> Result<Method, InvalidURIError> {
+    pub fn connect(uri: impl AsRef<str>) -> Result<Method, InvalidMethodError> {
         Self::build("CONNECT", uri)
     }
 
@@ -253,7 +253,7 @@ impl Method {
     ///
     /// # Returns
     ///
-    /// Returns the new instance [`Method`], or [`InvalidURIError`] if `uri` is blank.
+    /// Returns the new instance [`Method`], or [`InvalidMethodError`] if `uri` is blank.
     ///
     /// # Examples
     ///
@@ -262,7 +262,7 @@ impl Method {
     ///
     /// let trace_index = Method::trace("/");
     /// ```
-    pub fn trace(uri: impl AsRef<str>) -> Result<Method, InvalidURIError> {
+    pub fn trace(uri: impl AsRef<str>) -> Result<Method, InvalidMethodError> {
         Self::build("TRACE", uri)
     }
 
@@ -277,17 +277,13 @@ impl Method {
     ///
     /// Returns the instance of [`Method`], or the error if `line` is invalid.
     #[doc(hidden)]
-    fn try_from_line(line: impl AsRef<str>) -> Result<Method, Box<dyn InvalidMethodPartError>> {
+    fn try_from_line(line: impl AsRef<str>) -> Result<Method, InvalidMethodError> {
         let parts: Vec<_> = line.as_ref().split(' ').collect();
         let method = parts[0];
         let uri = parts[1];
 
         Self::check_method(method)
-            .map_err(|error| -> Box<dyn InvalidMethodPartError> { Box::new(error) })
-            .and(
-                Self::check_uri(uri)
-                    .map_err(|error| -> Box<dyn InvalidMethodPartError> { Box::new(error) }),
-            )
+            .and(Self::check_uri(uri))
             .and(Ok(Self {
                 method: method.to_uppercase(),
                 uri: uri.to_string(),
@@ -313,14 +309,14 @@ impl Method {
     ///
     /// # Returns
     ///
-    /// Returns a new instance of [`Method`] if all is good or an [`InvalidURIError`]
+    /// Returns a new instance of [`Method`] if all is good or an [`InvalidMethodError`]
     /// if the `uri` is blank.
     ///
     /// # Panics
     ///
     /// If `method` is not in [`Method::ALLOWED_METHODS`].
     #[doc(hidden)]
-    fn build(method: impl AsRef<str>, uri: impl AsRef<str>) -> Result<Method, InvalidURIError> {
+    fn build(method: impl AsRef<str>, uri: impl AsRef<str>) -> Result<Method, InvalidMethodError> {
         let method = method.as_ref();
         let uri = uri.as_ref();
 
@@ -342,13 +338,13 @@ impl Method {
     ///
     /// # Returns
     ///
-    /// Returns nothing if the `uri` is good, or [`InvalidURIError`] if the `uri` is
+    /// Returns nothing if the `uri` is good, or [`InvalidMethodError`] if the `uri` is
     /// blank.
     #[doc(hidden)]
-    fn check_uri(uri: impl AsRef<str>) -> Result<(), InvalidURIError> {
+    fn check_uri(uri: impl AsRef<str>) -> Result<(), InvalidMethodError> {
         let uri = uri.as_ref();
         if uri.trim().is_empty() {
-            return Err(InvalidURIError::from(uri));
+            return Err(InvalidMethodError::InvalidURIError(uri.to_owned()));
         }
 
         Ok(())
@@ -369,7 +365,7 @@ impl Method {
     fn check_method(method: impl AsRef<str>) -> Result<(), InvalidMethodError> {
         let method = method.as_ref();
         if !Self::ALLOWED_METHODS.contains(&method) {
-            return Err(InvalidMethodError::from(method));
+            return Err(InvalidMethodError::InvalidVerbError(method.to_owned()));
         }
 
         Ok(())
@@ -383,7 +379,7 @@ impl Display for Method {
 }
 
 impl FromStr for Method {
-    type Err = Box<dyn InvalidMethodPartError>;
+    type Err = InvalidMethodError;
 
     /// Create a new instance of [`Method`] from the line.
     ///
@@ -400,7 +396,7 @@ impl FromStr for Method {
 }
 
 impl TryFrom<&str> for Method {
-    type Error = Box<dyn InvalidMethodPartError>;
+    type Error = InvalidMethodError;
 
     /// Create a new instance of [`Method`] from the line.
     ///
@@ -417,7 +413,7 @@ impl TryFrom<&str> for Method {
 }
 
 impl TryFrom<String> for Method {
-    type Error = Box<dyn InvalidMethodPartError>;
+    type Error = InvalidMethodError;
 
     /// Create a new instance of [`Method`] from the line.
     ///
@@ -434,7 +430,7 @@ impl TryFrom<String> for Method {
 }
 
 impl TryFrom<&String> for Method {
-    type Error = Box<dyn InvalidMethodPartError>;
+    type Error = InvalidMethodError;
 
     /// Create a new instance of [`Method`] from the line.
     ///
@@ -451,90 +447,23 @@ impl TryFrom<&String> for Method {
 }
 
 /// Indicate that [`Method::try_from()`] reads an invalid part (URI, Method).
-pub trait InvalidMethodPartError: Debug + Display + Error {}
-
-/// Indicate that [`Method::try_from()`] reads an invalid URI.
 #[derive(Debug, Clone)]
-pub struct InvalidURIError {
-    #[doc(hidden)]
-    entry: String,
-}
-
-impl Display for InvalidURIError {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "Invalid URI: '{}'", &self.entry)
-    }
-}
-
-impl FromStr for InvalidURIError {
-    type Err = ();
-
-    /// Create a new instance of [`InvalidURIError`] with the invalid entry.
-    ///
-    /// # Returns
-    ///
-    /// Returns a new instance of [`InvalidURIError`].
-    fn from_str(s: &str) -> Result<InvalidURIError, ()> {
-        Ok(Self::from(s))
-    }
-}
-
-impl From<&str> for InvalidURIError {
-    /// Create a new instance of [`InvalidURIError`] with the invalid entry.
-    ///
-    /// # Returns
-    ///
-    /// Returns a new instance of [`InvalidURIError`].
-    fn from(value: &str) -> InvalidURIError {
-        Self {
-            entry: value.to_owned(),
-        }
-    }
-}
-
-impl Error for InvalidURIError {}
-
-impl InvalidMethodPartError for InvalidURIError {}
-
-/// Indicate that [`Method::try_from()`] reads an invalid method verb.
-#[derive(Debug, Clone)]
-pub struct InvalidMethodError {
-    #[doc(hidden)]
-    entry: String,
+pub enum InvalidMethodError {
+    /// Indicate that [`Method::try_from()`] reads an invalid URI.
+    InvalidURIError(String),
+    /// Indicate that [`Method::try_from()`] reads an invalid method verb.
+    InvalidVerbError(String),
 }
 
 impl Display for InvalidMethodError {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "Invalid Method: '{}'", &self.entry)
-    }
-}
+        let msg = match self {
+            Self::InvalidURIError(entry) => format!("Invalid URI: '{}'", entry),
+            Self::InvalidVerbError(entry) => format!("Invalid Method: '{}'", entry),
+        };
 
-impl FromStr for InvalidMethodError {
-    type Err = ();
-
-    /// Create a new instance of [`InvalidMethodError`] with the invalid entry.
-    ///
-    /// # Returns
-    ///
-    /// Returns a new instance of [`InvalidMethodError`].
-    fn from_str(s: &str) -> Result<InvalidMethodError, ()> {
-        Ok(Self::from(s))
-    }
-}
-
-impl From<&str> for InvalidMethodError {
-    /// Create a new instance of [`InvalidMethodError`] with the invalid entry.
-    ///
-    /// # Returns
-    ///
-    /// Returns a new instance of [`InvalidMethodError`].
-    fn from(value: &str) -> InvalidMethodError {
-        Self {
-            entry: value.to_owned(),
-        }
+        write!(f, "{}", msg)
     }
 }
 
 impl Error for InvalidMethodError {}
-
-impl InvalidMethodPartError for InvalidMethodError {}
