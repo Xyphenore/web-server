@@ -223,7 +223,7 @@ impl WebServer {
     /// - If [`Response::add_file()`] returns an error.
     #[doc(hidden)]
     fn not_found_handler(request: Request) -> Response {
-        let mut response = Response::from((request, Status::NOT_FOUND));
+        let mut response = Response::from((request, Status::NotFound));
         response
             .add_file(Path::new("templates/not_found.html"))
             .unwrap();
