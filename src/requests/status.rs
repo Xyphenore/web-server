@@ -12,7 +12,7 @@ use std::fmt::{Debug, Display, Formatter};
 ///
 /// // You use it like an enumeration.
 /// ```
-#[derive(Debug, Clone, Hash, PartialEq, Eq, Ord, PartialOrd)]
+#[derive(Debug, Clone, Hash, PartialEq, Eq, Ord, PartialOrd, Copy)]
 pub struct Status {
     #[doc(hidden)]
     code: u16,

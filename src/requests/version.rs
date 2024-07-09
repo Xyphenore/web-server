@@ -23,7 +23,7 @@ use std::str::FromStr;
 ///
 /// let version = Version::from(line);
 /// ```
-#[derive(Debug, Clone, PartialEq, PartialOrd, Eq, Ord, Hash)]
+#[derive(Debug, Clone, PartialEq, PartialOrd, Eq, Ord, Hash, Copy)]
 pub struct Version {
     #[doc(hidden)]
     major: char,
