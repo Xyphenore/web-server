@@ -175,7 +175,7 @@ impl TryFrom<&str> for Version {
     ///
     /// # Parameters
     ///
-    /// - `line`: The line must be in the form: `HTTP/{version}`.
+    /// - `value`: The line must be in the form: `HTTP/{version}`.
     /// `{version}` can be like `major` or `major.minor`.
     ///
     /// # Returns
@@ -214,7 +214,7 @@ impl TryFrom<String> for Version {
     ///
     /// # Parameters
     ///
-    /// - `line`: The line must be in the form: `HTTP/{version}`.
+    /// - `value`: The line must be in the form: `HTTP/{version}`.
     /// `{version}` can be like `major` or `major.minor`.
     ///
     /// # Returns
@@ -253,7 +253,7 @@ impl TryFrom<&String> for Version {
     ///
     /// # Parameters
     ///
-    /// - `line`: The line must be in the form: `HTTP/{version}`.
+    /// - `value`: The line must be in the form: `HTTP/{version}`.
     /// `{version}` can be like `major` or `major.minor`.
     ///
     /// # Returns

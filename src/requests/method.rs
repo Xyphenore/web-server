@@ -405,7 +405,7 @@ impl TryFrom<&str> for Method {
     ///
     /// # Parameters
     ///
-    /// - `line`: The line must start like: `METHOD URI`.
+    /// - `value`: The line must start like: `METHOD URI`.
     ///
     /// # Returns
     ///
@@ -422,7 +422,7 @@ impl TryFrom<String> for Method {
     ///
     /// # Parameters
     ///
-    /// - `line`: The line must start like: `METHOD URI`.
+    /// - `value`: The line must start like: `METHOD URI`.
     ///
     /// # Returns
     ///
@@ -439,7 +439,7 @@ impl TryFrom<&String> for Method {
     ///
     /// # Parameters
     ///
-    /// - `line`: The line must start like: `METHOD URI`.
+    /// - `value`: The line must start like: `METHOD URI`.
     ///
     /// # Returns
     ///
