@@ -26,9 +26,6 @@ pub struct Request {
     method: Method,
     #[doc(hidden)]
     version: Version,
-    /// Other lines read from the stream.
-    #[doc(hidden)]
-    _other_lines: Vec<String>,
     #[doc(hidden)]
     stream: TcpStream,
 }
@@ -75,7 +72,6 @@ impl From<TcpStream> for Request {
         Request {
             method,
             version: Version::try_from(String::from_iter(parts)).unwrap(),
-            _other_lines: http_request,
             stream: value,
         }
     }
