@@ -1,6 +1,6 @@
 use std::num::NonZeroUsize;
-use std::sync::mpsc::{channel, SendError, Sender};
 use std::sync::{Arc, Mutex};
+use std::sync::mpsc::{channel, Sender, SendError};
 
 use crate::requests::Job;
 
