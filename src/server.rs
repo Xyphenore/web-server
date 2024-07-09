@@ -29,6 +29,7 @@ use std::sync::{Arc, Mutex};
 ///
 /// server.serve();
 /// ```
+#[derive(Debug)]
 pub struct WebServer {
     #[doc(hidden)]
     cpt: usize,
