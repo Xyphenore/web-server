@@ -1,3 +1,4 @@
+use std::error::Error;
 use std::fmt::{Display, Formatter};
 use std::str::FromStr;
 
@@ -323,3 +324,5 @@ impl From<&str> for InvalidHTTPVersionError {
         }
     }
 }
+
+impl Error for InvalidHTTPVersionError {}

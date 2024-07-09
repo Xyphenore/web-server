@@ -1,3 +1,4 @@
+use std::error::Error;
 use std::fmt::{Debug, Display, Formatter};
 use std::str::FromStr;
 
@@ -450,7 +451,7 @@ impl TryFrom<&String> for Method {
 }
 
 /// Indicate that [`Method::try_from()`] reads an invalid part (URI, Method).
-pub trait InvalidMethodPartError: Debug + Display {}
+pub trait InvalidMethodPartError: Debug + Display + Error {}
 
 /// Indicate that [`Method::try_from()`] reads an invalid URI.
 #[derive(Debug, Clone)]
@@ -490,6 +491,8 @@ impl From<&str> for InvalidURIError {
         }
     }
 }
+
+impl Error for InvalidURIError {}
 
 impl InvalidMethodPartError for InvalidURIError {}
 
@@ -531,5 +534,7 @@ impl From<&str> for InvalidMethodError {
         }
     }
 }
+
+impl Error for InvalidMethodError {}
 
 impl InvalidMethodPartError for InvalidMethodError {}
