@@ -2,6 +2,8 @@
 
 #![doc(issue_tracker_base_url = "https://github.com/Xyphenore/web-server/issues/")]
 
+use std::num::NonZeroUsize;
+
 use crate::routes::{index::get as get_index, slow_request::get as get_slow_request};
 use crate::server::{Debug, Method, WebServer};
 
@@ -22,7 +24,7 @@ static DEBUG: bool = false;
 ///
 /// - If any method ([`WebServer::serve()`] or [`WebServer::add_listener()`]) panics.
 fn main() {
-    WebServer::new(2, Debug::from(DEBUG))
+    WebServer::new(NonZeroUsize::new(2).unwrap(), Debug::from(DEBUG))
         .add_listener(Method::get("/").unwrap(), get_index)
         .add_listener(Method::get("/slow_request").unwrap(), get_slow_request)
         .serve();
