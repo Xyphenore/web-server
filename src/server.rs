@@ -103,9 +103,11 @@ impl WebServer {
     ///
     /// - If the `method` is already registered.
     pub fn add_listener(&mut self, method: Method, listener: HTTPListener) -> &mut WebServer {
-        if self.listeners.contains_key(&method) {
-            panic!("A listener is always registered for {}", method)
-        }
+        assert!(
+            !self.listeners.contains_key(&method),
+            "A listener is always registered for {}",
+            method,
+        );
 
         self.listeners.insert(method, listener);
 
