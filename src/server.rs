@@ -2,15 +2,15 @@
 //!
 //! To see how to create the web server, go to the class [`WebServer`].
 
-use std::collections::HashMap;
-use std::io::ErrorKind::WouldBlock;
-use std::net::{TcpListener, TcpStream};
-use std::path::Path;
-use std::sync::{Arc, Mutex};
-
 pub use crate::requests::Method;
 use crate::requests::{HTTPListener, Job, Request, Response, Status};
 use crate::threads::WorkerPool;
+use std::collections::HashMap;
+use std::io::ErrorKind::WouldBlock;
+use std::net::{Ipv4Addr, SocketAddrV4, TcpListener, TcpStream};
+use std::num::NonZeroUsize;
+use std::path::Path;
+use std::sync::{Arc, Mutex};
 
 /// The web server.
 ///
@@ -63,7 +63,7 @@ impl WebServer {
     /// # Panics
     ///
     /// - If `amount_workers` is equal to 0.
-    pub fn new(amount_workers: usize, debug: Debug) -> WebServer {
+    pub fn new(amount_workers: NonZeroUsize, debug: Debug) -> WebServer {
         Self {
             cpt: 0,
             debug: debug == Debug::True,

@@ -1,3 +1,4 @@
+use std::num::NonZeroUsize;
 use std::sync::mpsc::{channel, SendError, Sender};
 use std::sync::{Arc, Mutex};
 
@@ -49,16 +50,12 @@ impl WorkerPool {
     /// # Panics
     ///
     /// - If the size is zero.
-    pub fn new(capacity: usize) -> WorkerPool {
-        if capacity == 0 {
-            panic!("Pool capacity cannot be zero");
-        }
-
+    pub fn new(capacity: NonZeroUsize) -> WorkerPool {
         let (sender, receiver) = channel();
         let receiver = Arc::new(Mutex::new(receiver));
 
-        let mut workers = Vec::with_capacity(capacity);
-        for id in 0..capacity {
+        let mut workers = Vec::with_capacity(capacity.get());
+        for id in 0..capacity.get() {
             workers.push(Worker::new(id, Arc::clone(&receiver)));
         }
 
