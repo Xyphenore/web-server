@@ -1,4 +1,5 @@
 use std::fmt::{Debug, Display, Formatter};
+use std::str::FromStr;
 
 /// HTTP method
 ///
@@ -38,6 +39,23 @@ use std::fmt::{Debug, Display, Formatter};
 /// use crate::requests::Method;
 ///
 /// let method = Method::try_from("NOT /");
+/// assert!(method.is_err());
+/// ```
+///
+/// ```
+/// use crate::requests::Method;
+///
+/// let method = Method::from_str("GET /");
+/// assert!(method.is_ok());
+/// if let Ok(method) = method {
+///     assert_eq!(method.to_string(), "GET /");
+/// }
+/// ```
+///
+/// ```
+/// use crate::requests::Method;
+///
+/// let method = Method::from_str("NOT /");
 /// assert!(method.is_err());
 /// ```
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -363,6 +381,23 @@ impl Method {
     }
 }
 
+impl FromStr for Method {
+    type Err = Box<dyn InvalidMethodPartError>;
+
+    /// Create a new instance of [`Method`] from the line.
+    ///
+    /// # Parameters
+    ///
+    /// - `s`: The line must start like: `METHOD URI`.
+    ///
+    /// # Returns
+    ///
+    /// Returns the instance of [`Method`], or the error if `line` is invalid.
+    fn from_str(s: &str) -> Result<Method, Self::Err> {
+        Self::try_from(s)
+    }
+}
+
 impl TryFrom<&str> for Method {
     type Error = Box<dyn InvalidMethodPartError>;
 
@@ -430,6 +465,19 @@ impl Display for InvalidURIError {
     }
 }
 
+impl FromStr for InvalidURIError {
+    type Err = ();
+
+    /// Create a new instance of [`InvalidURIError`] with the invalid entry.
+    ///
+    /// # Returns
+    ///
+    /// Returns a new instance of [`InvalidURIError`].
+    fn from_str(s: &str) -> Result<InvalidURIError, ()> {
+        Ok(Self::from(s))
+    }
+}
+
 impl From<&str> for InvalidURIError {
     /// Create a new instance of [`InvalidURIError`] with the invalid entry.
     ///
@@ -455,6 +503,19 @@ pub struct InvalidMethodError {
 impl Display for InvalidMethodError {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "Invalid Method: '{}'", &self.entry)
+    }
+}
+
+impl FromStr for InvalidMethodError {
+    type Err = ();
+
+    /// Create a new instance of [`InvalidMethodError`] with the invalid entry.
+    ///
+    /// # Returns
+    ///
+    /// Returns a new instance of [`InvalidMethodError`].
+    fn from_str(s: &str) -> Result<InvalidMethodError, ()> {
+        Ok(Self::from(s))
     }
 }
 

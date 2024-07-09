@@ -1,4 +1,5 @@
 use std::fmt::{Display, Formatter};
+use std::str::FromStr;
 
 /// HTTP version.
 ///
@@ -120,6 +121,45 @@ impl Version {
     #[doc(hidden)]
     const ALLOWED_VERSIONS: &'static [Self] =
         &[Self::HTTP_1, Self::HTTP_1_1, Self::HTTP_2, Self::HTTP_3];
+}
+
+impl FromStr for Version {
+    type Err = InvalidHTTPVersionError;
+
+    /// Get a constant reference to an HTTP version.
+    ///
+    /// # Parameters
+    ///
+    /// - `s`: The line must be in the form: `HTTP/{version}`.
+    /// `{version}` can be like `major` or `major.minor`.
+    ///
+    /// # Returns
+    ///
+    /// Returns the constant to the good [`Version`], or a
+    /// [`InvalidHTTPVersionError`] if `line` does not respect the pattern.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// let version = Version::from_str("HTTP/1");
+    /// assert!(version.is_ok());
+    ///
+    /// if let Some(version) = version {
+    ///     assert_eq!(version.to_string(), "HTTP/1");
+    /// }
+    /// ```
+    ///
+    /// ```rust
+    /// let version = Version::from_str("1.0");
+    /// assert!(version.is_err());
+    ///
+    /// if let Err(error) = version {
+    ///     assert_eq!(error, "Invalid HTTP version: '1.0'");
+    /// }
+    /// ```
+    fn from_str(s: &str) -> Result<Version, Self::Err> {
+        Self::try_from(s)
+    }
 }
 
 impl TryFrom<&str> for Version {
@@ -249,6 +289,19 @@ pub struct InvalidHTTPVersionError {
 impl Display for InvalidHTTPVersionError {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "Invalid HTTP version: '{}'", &self.entry)
+    }
+}
+
+impl FromStr for InvalidHTTPVersionError {
+    type Err = ();
+
+    /// Create a new instance of [`InvalidHTTPVersionError`] with the invalid entry.
+    ///
+    /// # Returns
+    ///
+    /// Returns a new instance of [`InvalidHTTPVersionError`].
+    fn from_str(s: &str) -> Result<InvalidHTTPVersionError, ()> {
+        Ok(Self::from(s))
     }
 }
 
