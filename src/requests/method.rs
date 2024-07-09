@@ -62,9 +62,9 @@ use std::str::FromStr;
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Method {
     #[doc(hidden)]
-    uri: String,
+    verb: &'static str,
     #[doc(hidden)]
-    method: String,
+    uri: String,
 }
 
 impl Method {
@@ -278,16 +278,22 @@ impl Method {
     /// Returns the instance of [`Method`], or the error if `line` is invalid.
     #[doc(hidden)]
     fn try_from_line(line: impl AsRef<str>) -> Result<Method, InvalidMethodError> {
-        let parts: Vec<_> = line.as_ref().split(' ').collect();
-        let method = parts[0];
+        let parts: Vec<_> = line.as_ref().split(' ').take(2).collect();
+
+        let upper_verb = parts[0].to_uppercase();
         let uri = parts[1];
 
-        Self::check_method(method)
-            .and(Self::check_uri(uri))
-            .and(Ok(Self {
-                method: method.to_uppercase(),
-                uri: uri.to_string(),
-            }))
+        Self::check_uri(uri)
+            .and(
+                Self::ALLOWED_METHODS
+                    .iter()
+                    .find(|verb| **verb == upper_verb)
+                    .ok_or_else(|| InvalidMethodError::InvalidVerbError(parts[0].to_owned())),
+            )
+            .map(|verb| Self {
+                verb,
+                uri: uri.to_owned(),
+            })
     }
 
     /// All allowed methods in the HTTP protocol.
@@ -303,7 +309,6 @@ impl Method {
     /// # Parameters
     ///
     /// - `method`: A value in [`Method::ALLOWED_METHODS`].
-    /// A [`String`] or [`&str`].
     /// - `uri`: The URI of the method.
     /// A [`String`] or [`&str`].
     ///
@@ -316,17 +321,17 @@ impl Method {
     ///
     /// If `method` is not in [`Method::ALLOWED_METHODS`].
     #[doc(hidden)]
-    fn build(method: impl AsRef<str>, uri: impl AsRef<str>) -> Result<Method, InvalidMethodError> {
-        let method = method.as_ref();
+    fn build(method: &'static str, uri: impl AsRef<str>) -> Result<Method, InvalidMethodError> {
         let uri = uri.as_ref();
 
-        Self::check_method(method)
-            .map_err(|_| unreachable!("The method {} is not allowed.", method))
-            .and(Self::check_uri(uri))
-            .and(Ok(Self {
-                method: method.to_uppercase(),
-                uri: uri.to_string(),
-            }))
+        if !Self::ALLOWED_METHODS.contains(&method) {
+            unreachable!("The method {} is not allowed.", method);
+        }
+
+        Self::check_uri(uri).and(Ok(Self {
+            verb: method,
+            uri: uri.to_string(),
+        }))
     }
 
     /// Check if `uri` is not empty or blank.
@@ -349,32 +354,11 @@ impl Method {
 
         Ok(())
     }
-
-    /// Check if `method` is in [`Method::ALLOWED_METHODS`].
-    ///
-    /// # Parameters
-    ///
-    /// - `method`: The verb of the method.
-    /// A [`String`] or [`&str`].
-    ///
-    /// # Returns
-    ///
-    /// Returns nothing if the `method` is in [`Method::ALLOWED_METHODS`], or
-    /// [`InvalidMethodError`] if the `method` is blank.
-    #[doc(hidden)]
-    fn check_method(method: impl AsRef<str>) -> Result<(), InvalidMethodError> {
-        let method = method.as_ref();
-        if !Self::ALLOWED_METHODS.contains(&method) {
-            return Err(InvalidMethodError::InvalidVerbError(method.to_owned()));
-        }
-
-        Ok(())
-    }
 }
 
 impl Display for Method {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}_{}", self.method.to_uppercase(), &self.uri)
+        write!(f, "{}_{}", self.verb.to_uppercase(), &self.uri)
     }
 }
 
