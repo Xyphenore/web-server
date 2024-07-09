@@ -1,4 +1,5 @@
 use std::any::Any;
+use std::fmt::{Display, Formatter};
 use std::sync::mpsc::Receiver;
 use std::sync::{Arc, Mutex};
 use std::thread::{Builder, JoinHandle};
@@ -117,5 +118,15 @@ impl Worker {
     /// Returns the error of the thread or nothing if all is good.
     pub fn join(self) -> Result<(), Box<dyn Any + Send + 'static>> {
         self.handle.join()
+    }
+}
+
+impl Display for Worker {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{}",
+            self.handle.thread().name().unwrap_or("Worker - unknown")
+        )
     }
 }

@@ -3,6 +3,7 @@
 //! To see how to create the web server, go to the class [`WebServer`].
 
 use std::collections::HashMap;
+use std::fmt::{Display, Formatter};
 use std::io::ErrorKind::WouldBlock;
 use std::net::{Ipv4Addr, SocketAddrV4, TcpListener, TcpStream};
 use std::num::NonZeroUsize;
@@ -266,5 +267,18 @@ impl From<bool> for Debug {
             true => Self::True,
             false => Self::False,
         }
+    }
+}
+
+impl Display for Debug {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{}",
+            match self {
+                Self::True => "True",
+                Self::False => "False",
+            }
+        )
     }
 }
