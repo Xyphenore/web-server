@@ -35,16 +35,6 @@ pub struct WorkerPool {
     queue: Option<Sender<Job>>,
 }
 
-impl Drop for WorkerPool {
-    fn drop(&mut self) {
-        drop(self.queue.take());
-
-        while !self.workers.is_empty() {
-            self.workers.remove(0).join().unwrap();
-        }
-    }
-}
-
 impl WorkerPool {
     /// Create a new WorkerPool.
     ///
@@ -96,5 +86,15 @@ impl WorkerPool {
     /// - If the pool is used during its drop.
     pub fn execute(&mut self, job: Job) -> Result<(), SendError<Job>> {
         self.queue.as_ref().unwrap().send(job)
+    }
+}
+
+impl Drop for WorkerPool {
+    fn drop(&mut self) {
+        drop(self.queue.take());
+
+        while !self.workers.is_empty() {
+            self.workers.remove(0).join().unwrap();
+        }
     }
 }

@@ -31,16 +31,6 @@ pub struct Version {
     minor: char,
 }
 
-impl Display for Version {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        if '0' != self.minor {
-            write!(f, "HTTP/{}.{}", self.major, self.minor)
-        } else {
-            write!(f, "HTTP/{}", self.major)
-        }
-    }
-}
-
 impl Version {
     /// HTTP Version 1
     ///
@@ -121,6 +111,16 @@ impl Version {
     #[doc(hidden)]
     const ALLOWED_VERSIONS: &'static [Self] =
         &[Self::HTTP_1, Self::HTTP_1_1, Self::HTTP_2, Self::HTTP_3];
+}
+
+impl Display for Version {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        if '0' != self.minor {
+            write!(f, "HTTP/{}.{}", self.major, self.minor)
+        } else {
+            write!(f, "HTTP/{}", self.major)
+        }
+    }
 }
 
 impl FromStr for Version {

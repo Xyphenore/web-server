@@ -36,19 +36,6 @@ pub struct Response {
     stream: TcpStream,
 }
 
-impl Display for Response {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(
-            f,
-            "{} {}\r\nContent-Length: {}\r\n\r\n{}",
-            &self.version,
-            &self.status,
-            self.contents.len(),
-            &self.contents,
-        )
-    }
-}
-
 impl Response {
     /// Add the content of the file to the [`Response`].
     ///
@@ -106,6 +93,19 @@ impl Response {
     /// - If the [`TcpStream::write_all`] panics.
     pub fn send(&mut self) {
         self.stream.write_all(self.to_string().as_bytes()).unwrap()
+    }
+}
+
+impl Display for Response {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{} {}\r\nContent-Length: {}\r\n\r\n{}",
+            &self.version,
+            &self.status,
+            self.contents.len(),
+            &self.contents,
+        )
     }
 }
 

@@ -66,12 +66,6 @@ pub struct Method {
     method: String,
 }
 
-impl Display for Method {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}_{}", self.method.to_uppercase(), &self.uri)
-    }
-}
-
 impl Method {
     /// Create a `GET` method with the URI.
     ///
@@ -378,6 +372,12 @@ impl Method {
         }
 
         Ok(())
+    }
+}
+
+impl Display for Method {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}_{}", self.method.to_uppercase(), &self.uri)
     }
 }
 

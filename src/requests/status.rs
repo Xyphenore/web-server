@@ -20,12 +20,6 @@ pub struct Status {
     name: &'static str,
 }
 
-impl Display for Status {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{} {}", self.code, self.name)
-    }
-}
-
 impl Status {
     /// HTTP status `OK`.
     ///
@@ -42,4 +36,10 @@ impl Status {
         code: 404,
         name: "NOT FOUND",
     };
+}
+
+impl Display for Status {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{} {}", self.code, self.name)
+    }
 }
