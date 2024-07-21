@@ -106,12 +106,12 @@ if get_option('debug')
     ]
 
     if compiler.get_id() == 'gcc'
-        if compiler.version().version_compare('<11')
+        if compiler.version().version_compare('<7')
             error(
-                'Please use GCC-11 or upper to compile the library,',
+                'Please use GCC-7 or upper to compile the executable,',
                 'you use the version: ' + compiler.version() + '.',
-                'Use the command like this: CC=gcc-11 CXX=g++-11 meson setup buildDir,',
-                'just replace \'gcc-11\' and \'g++-11\' by alias of your compiler version',
+                'Use the command like this: CC=gcc-7 CXX=g++-7 meson setup buildDir,',
+                'just replace \'gcc-7\' and \'g++-7\' by alias of your compiler version',
                 'and replace \'buildDir\' by the name of your build directory.',
             )
         endif
