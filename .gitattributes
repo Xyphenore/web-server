@@ -1,0 +1,20 @@
+# Set the default behavior, in case people don't have core.autocrlf set.
+* text=lf
+
+# Explicitly declare text files you want to always be normalized and converted
+# to native line endings on checkout.
+*.cpp text
+*.hpp text
+*.tpp text
+*.py text
+*.ini text
+*.options text
+*.build text
+*.lock text
+*.toml text
+*.wrap text
+*.txt text
+*.cmake text
+*.in text
+*.conf text
+*.md text

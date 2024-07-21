@@ -1,0 +1,31 @@
+# ---------------------------------------
+#  Specific build options of the library
+# ---------------------------------------
+
+# -------------------------------------------
+#  Specific GCC build options of the library
+# -------------------------------------------
+
+option(
+    'gcc_threadsafe_statics',
+    type : 'boolean', value : true,
+    description : 'Use Thread safe statics for the library.',
+)
+
+option(
+    'gcc_cxa_atexit',
+    type : 'boolean', value : false,
+    description : 'Use CXA optimization for the library.',
+)
+
+option(
+    'gcc_visibility_inlines_hidden',
+    type : 'boolean', value : false,
+    description : 'Use visibility inlines hidden optimization for the library.',
+)
+
+option(
+    'gcc_gnu_keywords',
+    type : 'boolean', value : false,
+    description : 'Use GNU keywords in the library.',
+)

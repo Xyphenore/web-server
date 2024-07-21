@@ -1,4 +1,59 @@
-/target
+# Prerequisites
+*.d
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+*.smod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+# Build directory of Intellij
+*build*
+.git/
+
+# Doc config
+docs/DoxygenConfig.conf
+
+# Python env
+.venv
+venv
+
+# Vale style
+.vale-styles
+
+# Meson configurations (don't ignore them)
+!meson.build
+!meson.options
+
+# Downloaded dependencies
+subprojects/**/*
+
+# Keep dependencies wraps
+!subprojects/**/*.wrap
 
 # IDE JetBrains config
 .idea
