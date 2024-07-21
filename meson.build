@@ -95,7 +95,6 @@ if get_option('debug')
     gnu_symbols = 'default'
 
     extra_flags = [
-        '-g', # Remove it TODO
         '-Wall', '-Wextra', '-Wpedantic', '-Weffc++',
         '-fstrict-enums',
         '-Wctor-dtor-privacy', '-Wnon-virtual-dtor',
