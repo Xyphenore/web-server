@@ -9,23 +9,23 @@
 option(
     'gcc_threadsafe_statics',
     type : 'boolean', value : true,
-    description : 'Use Thread safe statics for the library.',
+    description : 'Use Thread safe statics for the executable.',
 )
 
 option(
     'gcc_cxa_atexit',
     type : 'boolean', value : false,
-    description : 'Use CXA optimization for the library.',
+    description : 'Use CXA optimization for the executable.',
 )
 
 option(
     'gcc_visibility_inlines_hidden',
     type : 'boolean', value : false,
-    description : 'Use visibility inlines hidden optimization for the library.',
+    description : 'Use visibility inlines hidden optimization for the executable.',
 )
 
 option(
     'gcc_gnu_keywords',
     type : 'boolean', value : false,
-    description : 'Use GNU keywords in the library.',
+    description : 'Use GNU keywords in the executable.',
 )
