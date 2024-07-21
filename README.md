@@ -46,3 +46,15 @@ Compilers need to compile C++17.
 CC=gcc CXX=g++ meson setup buildDir
 cd buildDir && meson compile
 ```
+
+### Run it
+
+```shell
+web-server
+```
+
+or
+
+```shell
+web-server.exe
+```
