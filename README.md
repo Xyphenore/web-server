@@ -11,7 +11,7 @@ You can use [Crow](https://github.com/ipkn/crow) or
 [![Version](https://img.shields.io/badge/Version-v0.2.0-blue.svg)]()
 [![C++](https://img.shields.io/badge/Language-C++17-blue.svg)]()
 [![LGPL3.0 License](https://img.shields.io/badge/License-LGPL%20v3.0-green.svg)](https://www.gnu.org/licenses/lgpl-3.0.html)
-[![Build](https://img.shields.io/badge/Build-Meson%201.4.0%20/%20-graen.svg)](https://mesonbuild.com/index.html)
+[![Build](https://img.shields.io/badge/Build-Meson%201.4.0%20-graen.svg)](https://mesonbuild.com/index.html)
 
 ## Table of contents
 
