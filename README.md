@@ -10,7 +10,7 @@ You can use [ActixWeb](https://actix.rs/).
 [![Version](https://img.shields.io/badge/Version-v0.11.0-blue.svg)]()
 [![Rust](https://img.shields.io/badge/Language-Rust2021-blue.svg)]()
 [![LGPL3.0 License](https://img.shields.io/badge/License-LGPL%20v3.0-green.svg)](https://www.gnu.org/licenses/lgpl-3.0.html)
-[![Build](https://img.shields.io/badge/Build-Cargo%201.79.0%20-graen.svg)]
+![Build](https://img.shields.io/badge/Build-Cargo%201.79.0%20-graen.svg)
 
 ## Table of contents
 
