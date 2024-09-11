@@ -18,7 +18,7 @@ namespace web_server::helpers {
         std::ignore = std::transform(
 #ifdef __cpp_lib_execution
             std::execution::par_unseq,
-#endif
+#endif // __cpp_lib_execution
             value.begin(),
             value.end(),
             upper_value.begin(),
@@ -33,7 +33,7 @@ namespace web_server::helpers {
         const auto* const last_left_blank_char = std::find_if_not(
 #ifdef __cpp_lib_execution
             std::execution::par_unseq,
-#endif
+#endif // __cpp_lib_execution
             value.begin(),
             value.end(),
             [&locale](const char ch) { return std::isblank(ch, locale) or std::isspace(ch, locale); });
