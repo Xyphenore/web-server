@@ -25,8 +25,8 @@ namespace {
     constexpr errno_t OLD_GLIBC_FAILURE{-1};
 
     errno_t safe_strerror(std::string& error, const errno_t error_code) noexcept {
-#if defined(_WIN32) || defined(WIN32) || not defined(__USE_GNU)
-    #ifdef _WIN32 || WIN32
+#if defined(_WIN32) or defined(WIN32) or not defined(__USE_GNU)
+    #if defined(_WIN32) or defined(WIN32)
         const auto error_code_strerror = ::strerror_s(error.data(), error.size(), error_code);
     #else // POSIX and not GNU
         const auto error_code_strerror = ::strerror_r(error_code, error.data(), error.size());
