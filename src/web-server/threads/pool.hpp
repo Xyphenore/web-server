@@ -87,7 +87,7 @@ namespace web_server::threads {
             using WorkerIDs = std::integer_sequence<WorkerID, ids...>;
 
             template <WorkerID... ids>
-            constexpr explicit WorkerPool(QueueInserter queue, WorkerIDs<ids...> ids_) noexcept;
+            explicit WorkerPool(QueueInserter queue, WorkerIDs<ids...> ids_) noexcept;
 
             std::array<Worker, amount> workers_;
             QueueInserter queue_;
