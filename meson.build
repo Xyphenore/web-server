@@ -70,7 +70,7 @@ message('System supported.')
 compile_options = {}
 
 message('Checking if the compiler is supported...')
-supported_compilers = ['gcc', 'clang', 'clang-cl']
+supported_compilers = ['gcc', 'clang', 'clang-cl', 'msvc']
 
 compiler = meson.get_compiler('cpp')
 if meson.get_compiler('cpp').get_id() not in supported_compilers
