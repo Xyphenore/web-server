@@ -185,7 +185,6 @@ if get_option('debug')
         extra_flags += [
             '-fno-nonansi-builtins',
             '-fnothrow-opt',
-            '-fno-operator-names',
             '-fchar8_t',
             '-Wnoexcept',
             '-Wstrict-null-sentinel',
