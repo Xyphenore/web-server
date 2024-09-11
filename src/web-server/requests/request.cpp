@@ -51,12 +51,6 @@ namespace {
         std::regex::ECMAScript | std::regex::icase | std::regex::optimize,
     };
 
-    using StringMatchSize = std::smatch::size_type;
-
-    constexpr StringMatchSize VERB_INDEX{1};
-    constexpr StringMatchSize URI_INDEX{2};
-    constexpr StringMatchSize VERSION_INDEX{3};
-
     [[nodiscard]] std::string read(TCPStream& stream) {
         std::string content{};
 
@@ -103,6 +97,12 @@ namespace web_server::requests {
     } // namespace errors
 
     Request Request::from(Stream&& stream) {
+        using StringMatchSize = std::smatch::size_type;
+
+        static constexpr StringMatchSize VERB_INDEX{1};
+        static constexpr StringMatchSize URI_INDEX{2};
+        static constexpr StringMatchSize VERSION_INDEX{3};
+
         const auto content = read(stream);
 
         std::smatch match{};
@@ -111,8 +111,8 @@ namespace web_server::requests {
         }
 
         return Request{
-            Method{to_verb(match.str(::VERB_INDEX)), to_uri(match.str(::URI_INDEX))},
-            to_version(match.str(::VERSION_INDEX)),
+            Method{to_verb(match.str(VERB_INDEX)), to_uri(match.str(URI_INDEX))},
+            to_version(match.str(VERSION_INDEX)),
             std::move(stream),
         };
     }

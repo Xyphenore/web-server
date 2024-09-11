@@ -13,26 +13,7 @@
 #include <utility>
 
 namespace {
-    using Method = web_server::requests::Method;
-    using Verb = Method::Verb;
-
-    const std::regex URI_REGEX{
-        Method::URI::REGEX_STRING.cbegin(),
-        Method::URI::REGEX_STRING.cend(),
-        std::regex::ECMAScript | std::regex::optimize,
-    };
-
-    const std::unordered_map<std::string, Verb> ALLOWED_VERBS{
-        {web_server::helpers::to_uppercase(fmt::to_string(Verb::Get)), Verb::Get},
-        {web_server::helpers::to_uppercase(fmt::to_string(Verb::Post)), Verb::Post},
-        {web_server::helpers::to_uppercase(fmt::to_string(Verb::Update)), Verb::Update},
-        {web_server::helpers::to_uppercase(fmt::to_string(Verb::Patch)), Verb::Patch},
-        {web_server::helpers::to_uppercase(fmt::to_string(Verb::Head)), Verb::Head},
-        {web_server::helpers::to_uppercase(fmt::to_string(Verb::Options)), Verb::Options},
-        {web_server::helpers::to_uppercase(fmt::to_string(Verb::Trace)), Verb::Trace},
-        {web_server::helpers::to_uppercase(fmt::to_string(Verb::Delete)), Verb::Delete},
-        {web_server::helpers::to_uppercase(fmt::to_string(Verb::Connect)), Verb::Connect},
-    };
+    using Verb = web_server::requests::Method::Verb;
 } // namespace
 
 namespace web_server::requests {
@@ -57,6 +38,18 @@ namespace web_server::requests {
     Method::Method(Verb verb, URI uri) noexcept: value_{fmt::format(FMT_STRING("{} {}"), verb, std::move(uri))} {}
 
     Method::Verb to_verb(const std::string_view verb) {
+        static const std::unordered_map<std::string, Verb> ALLOWED_VERBS{
+            {web_server::helpers::to_uppercase(fmt::to_string(Verb::Get)), Verb::Get},
+            {web_server::helpers::to_uppercase(fmt::to_string(Verb::Post)), Verb::Post},
+            {web_server::helpers::to_uppercase(fmt::to_string(Verb::Update)), Verb::Update},
+            {web_server::helpers::to_uppercase(fmt::to_string(Verb::Patch)), Verb::Patch},
+            {web_server::helpers::to_uppercase(fmt::to_string(Verb::Head)), Verb::Head},
+            {web_server::helpers::to_uppercase(fmt::to_string(Verb::Options)), Verb::Options},
+            {web_server::helpers::to_uppercase(fmt::to_string(Verb::Trace)), Verb::Trace},
+            {web_server::helpers::to_uppercase(fmt::to_string(Verb::Delete)), Verb::Delete},
+            {web_server::helpers::to_uppercase(fmt::to_string(Verb::Connect)), Verb::Connect},
+        };
+
         try {
             return ALLOWED_VERBS.at(helpers::to_uppercase(verb));
         }
@@ -66,7 +59,13 @@ namespace web_server::requests {
     }
 
     Method::URI::URI(const std::string_view value): value_{value} {
-        if (not std::regex_match(value_, ::URI_REGEX)) {
+        static const std::regex URI_REGEX{
+            Method::URI::REGEX_STRING.cbegin(),
+            Method::URI::REGEX_STRING.cend(),
+            std::regex::ECMAScript | std::regex::optimize,
+        };
+
+        if (not std::regex_match(value_, URI_REGEX)) {
             throw errors::InvalidURIError{value};
         }
     }

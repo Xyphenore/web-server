@@ -10,17 +10,6 @@
 #include <string_view>
 #include <unordered_map>
 
-namespace {
-    using Version = web_server::requests::Version;
-
-    const std::unordered_map<std::string, Version> ALLOWED_VERSIONS{
-        {web_server::helpers::to_uppercase(fmt::to_string(Version::HTTP_1)), Version::HTTP_1},
-        {web_server::helpers::to_uppercase(fmt::to_string(Version::HTTP_1_1)), Version::HTTP_1_1},
-        {web_server::helpers::to_uppercase(fmt::to_string(Version::HTTP_2)), Version::HTTP_2},
-        {web_server::helpers::to_uppercase(fmt::to_string(Version::HTTP_3)), Version::HTTP_3},
-    };
-} // namespace
-
 namespace web_server::requests {
     namespace errors {
         InvalidHTTPVersionError::InvalidHTTPVersionError(std::string_view version):
@@ -46,6 +35,13 @@ namespace web_server::requests {
     }
 
     Version to_version(const std::string_view version) {
+        static const std::unordered_map<std::string, Version> ALLOWED_VERSIONS{
+            {web_server::helpers::to_uppercase(fmt::to_string(Version::HTTP_1)), Version::HTTP_1},
+            {web_server::helpers::to_uppercase(fmt::to_string(Version::HTTP_1_1)), Version::HTTP_1_1},
+            {web_server::helpers::to_uppercase(fmt::to_string(Version::HTTP_2)), Version::HTTP_2},
+            {web_server::helpers::to_uppercase(fmt::to_string(Version::HTTP_3)), Version::HTTP_3},
+        };
+
         try {
             return ALLOWED_VERSIONS.at(helpers::to_uppercase(version));
         }
