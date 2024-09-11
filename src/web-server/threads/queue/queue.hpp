@@ -53,7 +53,7 @@ namespace web_server::threads::queue {
             const std::lock_guard lk{mutex_};
 
             if (is_closed_) {
-                helpers::panic_due_to_a_logic_error("Cannot do the operation 'CLOSE', the queue is already closed.");
+                helpers::panic_due_to_logic_error("Cannot do the operation 'CLOSE', the queue is already closed.");
             }
             is_closed_ = true;
         }
@@ -67,7 +67,7 @@ namespace web_server::threads::queue {
             const std::lock_guard lk{mutex_};
 
             if (is_closed_) {
-                helpers::panic_due_to_a_logic_error("Cannot do the operation 'PUSH', the queue is already closed.");
+                helpers::panic_due_to_logic_error("Cannot do the operation 'PUSH', the queue is already closed.");
             }
 
             elements_.push_back(std::move(element));
@@ -92,7 +92,7 @@ namespace web_server::threads::queue {
             throw errors::QueueClosedException{};
         }
 
-        helpers::panic_due_to_a_logic_error("Queue is empty, it is not possible to pop an element.");
+        helpers::panic_due_to_logic_error("Queue is empty, it is not possible to pop an element.");
     }
 } // namespace web_server::threads::queue
 

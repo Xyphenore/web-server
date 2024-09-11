@@ -48,7 +48,7 @@ namespace web_server::threads::queue {
     template <typename T>
     void QueueInserter<T>::push(T element) noexcept {
         if (nullptr == queue_) {
-            helpers::panic_due_to_a_logic_error("Queue pointer is null. You use a moved inserter.");
+            helpers::panic_due_to_logic_error("Queue pointer is null. You use a moved inserter.");
         }
 
         queue_->push(std::move(element));
@@ -57,7 +57,7 @@ namespace web_server::threads::queue {
     template <typename T>
     typename QueueInserter<T>::QueueExtractor QueueInserter<T>::make_extractor() noexcept {
         if (nullptr == queue_) {
-            helpers::panic_due_to_a_logic_error("Queue pointer is null. You use a moved inserter.");
+            helpers::panic_due_to_logic_error("Queue pointer is null. You use a moved inserter.");
         }
 
         return QueueExtractor{queue_};

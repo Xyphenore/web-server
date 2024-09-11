@@ -10,7 +10,7 @@
 namespace web_server::server {
     void HTTPHandlers::link(Method method, Handler handler) noexcept {
         if (const auto [_, inserted] = handlers_.try_emplace(std::move(method), std::move(handler)); not inserted) {
-            helpers::panic_due_to_a_logic_error(
+            helpers::panic_due_to_logic_error(
                 fmt::format(FMT_STRING("The method {} has already a listener registered."), method));
         }
     }

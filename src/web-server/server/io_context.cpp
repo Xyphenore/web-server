@@ -24,7 +24,7 @@ namespace web_server::server {
 
     void IOContext::link(const std::initializer_list<Signal> signal_ids, SignalHandler handler) {
         if (0 == signal_ids.size()) {
-            helpers::panic_due_to_a_logic_error("The signal list is empty.");
+            helpers::panic_due_to_logic_error("The signal list is empty.");
         }
 
         auto& signals = signals_.emplace_back(io_context_);

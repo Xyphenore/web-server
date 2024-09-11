@@ -40,14 +40,14 @@ namespace web_server::threads::queue {
     template <typename T>
     QueueExtractor<T>::QueueExtractor(QueuePointer queue) noexcept: queue_{std::move(queue)} {
         if (nullptr == queue_) {
-            helpers::panic_due_to_a_logic_error("Queue pointer is null.");
+            helpers::panic_due_to_logic_error("Queue pointer is null.");
         }
     }
 
     template <typename T>
     T QueueExtractor<T>::pop() {
         if (nullptr == queue_) {
-            helpers::panic_due_to_a_logic_error("Queue pointer is null. You use a moved extractor.");
+            helpers::panic_due_to_logic_error("Queue pointer is null. You use a moved extractor.");
         }
 
         return queue_->pop();
