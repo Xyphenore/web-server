@@ -35,11 +35,11 @@ namespace web_server::requests {
             case Version::HTTP_1_1 : value = "HTTP/1.1"; break;
             case Version::HTTP_2 : value = "HTTP/2"; break;
             case Version::HTTP_3 : value = "HTTP/3"; break;
-            default : helpers::panic_due_to_a_logic_error("The HTTP version is not supported.");
+            default : helpers::panic_due_to_logic_error("The HTTP version is not supported.");
         }
 
         if (helpers::is_blank(value)) {
-            helpers::panic_due_to_a_logic_error("Blank HTTP version.");
+            helpers::panic_due_to_logic_error("Blank HTTP version.");
         }
 
         return os << helpers::to_uppercase(value);

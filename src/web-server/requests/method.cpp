@@ -43,11 +43,11 @@ namespace web_server::requests {
             switch (type) {
                 case ElementTypes::Verb : value = "verb"; break;
                 case ElementTypes::URI : value = "URI"; break;
-                default : helpers::panic_due_to_a_logic_error("Invalid value of the enum ElementTypes.");
+                default : helpers::panic_due_to_logic_error("Invalid value of the enum ElementTypes.");
             }
 
             if (helpers::is_blank(value)) {
-                helpers::panic_due_to_a_logic_error("The element type value is blank.");
+                helpers::panic_due_to_logic_error("The element type value is blank.");
             }
 
             return os << value;
@@ -84,11 +84,11 @@ namespace web_server::requests {
             case Verb::Head : value = "HEAD"; break;
             case Verb::Connect : value = "CONNECT"; break;
             case Verb::Trace : value = "TRACE"; break;
-            default : helpers::panic_due_to_a_logic_error("Value of Method::Verb without linked case.");
+            default : helpers::panic_due_to_logic_error("Value of Method::Verb without linked case.");
         }
 
         if (helpers::is_blank(value)) {
-            helpers::panic_due_to_a_logic_error("Value of Method::Verb is blank.");
+            helpers::panic_due_to_logic_error("Value of Method::Verb is blank.");
         }
 
         return os << helpers::to_uppercase(value);
