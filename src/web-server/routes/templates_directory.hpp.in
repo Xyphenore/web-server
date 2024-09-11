@@ -1,0 +1,10 @@
+#ifndef ROUTES_TEMPLATES_DIRECTORY_HPP
+#define ROUTES_TEMPLATES_DIRECTORY_HPP
+
+#include <filesystem>
+
+namespace web_server::routes::tools {
+    static inline const std::filesystem::path TEMPLATES_DIRECTORY{"@TEMPLATES_DIRECTORY@"};
+} // namespace web_server::routes::tools
+
+#endif // ROUTES_TEMPLATES_DIRECTORY_HPP

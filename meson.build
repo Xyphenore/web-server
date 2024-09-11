@@ -234,7 +234,37 @@ message('The library \'fmt\' (' + fmt_dep.version() + ') is built.')
 
 message('Building the executable...')
 
-web_server_src = files('src' / meson.project_name() / 'main.cpp')
+configure_file(
+    input : 'src' / meson.project_name() / 'routes' / 'templates_directory.hpp.in',
+    configuration : { 'TEMPLATES_DIRECTORY' : meson.current_source_dir() / 'templates' },
+    output : '@BASENAME@',
+)
+
+web_server_src = files(
+    'src' / meson.project_name() / 'helpers' / 'errors.cpp',
+    'src' / meson.project_name() / 'helpers' / 'sockets.cpp',
+    'src' / meson.project_name() / 'helpers' / 'string.cpp',
+
+    'src' / meson.project_name() / 'requests' / 'errors.cpp',
+    'src' / meson.project_name() / 'requests' / 'method.cpp',
+    'src' / meson.project_name() / 'requests' / 'request.cpp',
+    'src' / meson.project_name() / 'requests' / 'response.cpp',
+    'src' / meson.project_name() / 'requests' / 'status.cpp',
+    'src' / meson.project_name() / 'requests' / 'version.cpp',
+
+    'src' / meson.project_name() / 'routes' / 'index.cpp',
+    'src' / meson.project_name() / 'routes' / 'slow_request.cpp',
+    'src' / meson.project_name() / 'routes' / 'not_found.cpp',
+
+    'src' / meson.project_name() / 'threads' / 'worker.cpp',
+
+    'src' / meson.project_name() / 'server' / 'http_handlers.cpp',
+    'src' / meson.project_name() / 'server' / 'io_context.cpp',
+    'src' / meson.project_name() / 'server' / 'running_state.cpp',
+
+    'src' / meson.project_name() / 'main.cpp',
+)
+
 web_server_templates = files(
     'templates' / 'index.html',
     'templates' / 'not_found.html',
@@ -245,7 +275,7 @@ web_server_executable = executable(
     meson.project_name(),
     sources : web_server_src,
     extra_files : web_server_templates,
-    dependencies : asio_dep,
+    dependencies : [asio_dep, fmt_dep],
     gnu_symbol_visibility : get_option('debug') ? gnu_symbols : 'default',
     cpp_args : extra_flags,
     implicit_include_directories : true,

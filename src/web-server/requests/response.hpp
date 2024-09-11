@@ -1,51 +1,16 @@
 #ifndef REQUESTS_RESPONSE_HPP
 #define REQUESTS_RESPONSE_HPP
 
-#include <cerrno>
-#include <cstring>
-#include <system_error>
-#include <string>
-#include <fstream>
-#include <ios>
-#include <iostream>
+#include "request.hpp"
+#include "status.hpp"
+
+#include <web-server/helpers/sockets.hpp>
+
 #include <filesystem>
+#include <string>
 #include <utility>
 
-#include <asio/ip/tcp.hpp>
-#include <asio/write.hpp>
-#include <asio/read.hpp>
-#include <asio/buffer.hpp>
-
-#include "version.hpp"
-#include "status.hpp"
-#include "request.hpp"
-#include "errors.hpp"
-
 namespace web_server::requests {
-    namespace errors {
-        constexpr static auto READ_ERROR_CODE = 10;
-
-        class FileReadError final: public std::ios_base::failure {
-            public:
-                explicit FileReadError(const std::filesystem::path& file) :
-                    std::ios_base::failure{
-                        "Cannot read a line from the file: '"
-                        + (((file.string() += "'. The reason: '") += std::strerror(errno)) += "'."),
-                        std::error_code(READ_ERROR_CODE, std::iostream_category())
-                    } {}
-        };
-
-        class CannotOpenFileError final: public std::ios_base::failure {
-            public:
-                explicit CannotOpenFileError(const std::filesystem::path& file) :
-                    std::ios_base::failure{
-                        "Cannot open the file: '"
-                        + (((file.string() += "'. The reason: '") += std::strerror(errno)) += "'."),
-                        std::error_code(READ_ERROR_CODE, std::iostream_category())
-                    } {}
-        };
-    } // namespace errors
-
     /// HTTP response.
     ///
     /// # How to use it?
@@ -64,17 +29,16 @@ namespace web_server::requests {
     ///     response.send();
     /// }
     /// ```
-    class Response final {
+    class [[nodiscard]] Response final {
         public:
-            using TcpStream = asio::ip::tcp::socket;
+            using Path = std::filesystem::path;
 
-            [[nodiscard]] static Response from(Request request, const Status& status) noexcept {
-                return {
-                    request.version(),
-                    status,
-                    request.take_stream(),
-                };
-            }
+            using Request = Request;
+            using Status = Status;
+            using Version = Request::Version;
+            using Stream = Request::Stream;
+
+            static Response from(Request request, Status status) noexcept;
 
             /// Add the content of the file to the [`Response`].
             ///
@@ -101,34 +65,7 @@ namespace web_server::requests {
             ///     response.send();
             /// }
             /// ```
-            void add_file(const std::filesystem::path& filename) {
-                std::ifstream file{filename};
-                if (!file.good()) {
-                    throw errors::CannotOpenFileError{filename};
-                }
-
-                std::string read_content{};
-
-                while (!file.eof()) {
-                    file.clear();
-
-                    std::ignore = std::getline(file, read_content);
-                    (contents_ += read_content) += '\n';
-
-                    if (file.bad()) {
-                        throw errors::FileReadError{filename};
-                    }
-
-                    if (file.fail() && (!file.eof())) {
-                        if (read_content.size() != read_content.max_size()) {
-                            throw errors::FileReadError{filename};
-                        }
-
-                        std::cerr << "Warning: The content string is full."
-                            << " Need one more round to read the file content.\n";
-                    }
-                }
-            }
+            void add_file(const Path& filename);
 
             /// Send the response to the stream [`TcpStream`].
             ///
@@ -152,54 +89,36 @@ namespace web_server::requests {
             /// # Panics
             ///
             /// - If the [`TcpStream::write_all`] panics.
-            void send() {
-                const auto message = to_string();
-
-                if (const auto transfered_size = asio::write(stream_, asio::buffer(message));
-                    message.size() != transfered_size) {
-                    throw errors::MessageNotCompletelySendError{
-                        message.size() - transfered_size,
-                        stream_.remote_endpoint().address()
-                    };
-                }
-
-                stream_.shutdown(TcpStream::shutdown_send);
-
-                try {
-                    std::string content{};
-                    std::ignore = asio::read(stream_, asio::dynamic_buffer(content));
-                }
-                catch (const asio::system_error& error) {
-                    if (error.code() != asio::error::eof) {
-                        throw;
-                    }
-                }
-
-                stream_.close();
-            }
+            void send();
 
         private:
-            Response(const Version version, const Status status, TcpStream stream) :
-                version_{version}, status_{status}, stream_{std::move(stream)} {}
+            explicit Response(Version version, Status status, Stream&& stream) noexcept;
 
-            [[nodiscard]] std::string to_string() const noexcept {
-                auto value = version_.to_string();
-                value += ' ';
-                value += status_.to_string();
-                value += "\r\n";
-
-                value += "Content-Length: " + std::to_string(contents_.length());
-                value += "\r\n\r\n";
-                value += contents_;
-
-                return value;
+            friend void swap(Response& lhs, Response& rhs) noexcept {
+                std::swap(lhs.status_, rhs.status_);
+                std::swap(lhs.version_, rhs.version_);
+                std::swap(lhs.contents_, rhs.contents_);
+                std::swap(lhs.stream_, rhs.stream_);
             }
 
-            Version version_;
             Status status_;
-            std::string contents_{};
-            TcpStream stream_;
+            Version version_;
+            std::string contents_;
+            Stream stream_;
     };
+} // namespace web_server::requests
+
+namespace web_server::requests {
+    inline Response::Response(const Version version, const Status status, Stream&& stream) noexcept:
+    status_{status}, version_{version}, stream_{std::move(stream)} {}
+
+    inline Response Response::from(Request request, const Status status) noexcept {
+        return Response{
+            request.version(),
+            status,
+            request.take_stream(),
+        };
+    }
 } // namespace web_server::requests
 
 #endif // REQUESTS_RESPONSE_HPP

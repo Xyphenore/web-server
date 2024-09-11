@@ -1,19 +1,13 @@
 #ifndef REQUESTS_JOB_HPP
 #define REQUESTS_JOB_HPP
 
+#include "request.hpp"
+#include "response.hpp"
+
+#include <functional>
 #include <utility>
 
-#include "response.hpp"
-#include "request.hpp"
-
 namespace web_server::requests {
-    /// Type for functions that can process a [`Request`] and returns a [`Response`].
-    ///
-    /// # Examples
-    ///
-    /// Check examples of [`WebServer`](crate::server::WebServer).
-    using HTTPListener = std::function<Response (Request)>;
-
     /// A transport structure for a [`Request`] and an [`HTTPListener`].
     ///
     /// # How to create it?
@@ -49,10 +43,21 @@ namespace web_server::requests {
     ///
     /// // Now, you need to send the response.
     /// ```
-    class Job final {
+    class [[nodiscard]] Job final {
         public:
-            Job(Request request, HTTPListener listener) noexcept:
-                request_{std::move(request)}, listener_{std::move(listener)} {}
+            using Request = Request;
+            using Response = Response;
+
+            /// Type for functions that can process a [`Request`] and returns a [`Response`].
+            ///
+            /// # Examples
+            ///
+            /// Check examples of [`WebServer`](crate::server::WebServer).
+            using Handler = std::function<Response(Request)>;
+
+            Job() noexcept = delete;
+
+            explicit Job(Request&& request, Handler handler) noexcept;
 
             /// Call the listener with the request.
             ///
@@ -63,14 +68,28 @@ namespace web_server::requests {
             /// # Panics
             ///
             /// - If the [`HTTPListener`] panics.
-            [[nodiscard]] Response execute() {
-                return listener_(std::move(request_));
-            }
+            Response execute();
+
+            Response operator()();
 
         private:
+            friend void swap(Job& lhs, Job& rhs) noexcept {
+                std::swap(lhs.request_, rhs.request_);
+                std::swap(lhs.handler_, rhs.handler_);
+            }
+
             Request request_;
-            HTTPListener listener_;
+            Handler handler_;
     };
+} // namespace web_server::requests
+
+namespace web_server::requests {
+    inline Job::Job(Request&& request, Handler handler) noexcept:
+    request_{std::move(request)}, handler_{std::move(handler)} {}
+
+    inline Job::Response Job::execute() { return handler_(std::move(request_)); }
+
+    inline Job::Response Job::operator()() { return this->execute(); }
 } // namespace web_server::requests
 
 #endif // REQUESTS_JOB_HPP

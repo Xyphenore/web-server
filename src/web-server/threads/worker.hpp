@@ -1,14 +1,12 @@
 #ifndef THREADS_WORKER_HPP
 #define THREADS_WORKER_HPP
 
-#include <thread>
-#include <iostream>
-#include <sstream>
-
-#include <web-server/requests/job.hpp>
 #include "queue/extractor.hpp"
-#include "queue/queue.hpp"
 
+#include <web-server/helpers/threads.hpp>
+#include <web-server/requests/job.hpp>
+
+#include <cstddef>
 
 namespace web_server::threads {
     /// Abstraction layer around a [`JoinHandle`].
@@ -70,9 +68,12 @@ namespace web_server::threads {
     /// <!-- References -->
     ///
     /// [WorkerPool]: super::pool::WorkerPool
-    class Worker final {
+    class [[nodiscard]] Worker final {
         public:
-            Worker() = delete;
+            using Job = requests::Job;
+            using QueueExtractor = queue::QueueExtractor<Job>;
+
+            using ID = std::size_t;
 
             /// Create a new worker with the ID and the receiver part of the
             /// [`std::sync::mpsc::channel()`] aka `queue`.
@@ -94,40 +95,20 @@ namespace web_server::threads {
             /// <!-- References -->
             ///
             /// [WorkerPool]: super::pool::WorkerPool
-            Worker(std::size_t id, queue::QueueExtractor<requests::Job> queue) :
-                handle_{serve, id, queue} {}
-
-            /// Join the thread and wait until the thread ends its execution.
-            ///
-            /// # Returns
-            ///
-            /// Returns the error of the thread or nothing if all is good.
-            void join() {
-                handle_.join();
-            }
+            explicit Worker(ID id, QueueExtractor queue) noexcept;
 
         private:
-            static void serve(const std::size_t id, queue::QueueExtractor<requests::Job> queue) {
-                auto is_running = true;
+            friend void swap(Worker& lhs, Worker& rhs) noexcept { std::swap(lhs.handle_, rhs.handle_); }
 
-                do {
-                    try {
-                        auto job = queue.pop();
-                        job.execute().send();
-                    }
-                    catch (const queue::errors::QueueClosedException&) {
-                        std::ostringstream msg{};
-                        msg << id;
-
-                        std::cout << "Worker " << msg.str() << " disconnected; shutting down.\n";
-
-                        is_running = false;
-                    }
-                }
-                while (is_running);
+            [[nodiscard]] friend bool operator==(const Worker& lhs, const Worker& rhs) noexcept {
+                return lhs.handle_ == rhs.handle_;
             }
 
-            std::thread handle_;
+            [[nodiscard]] friend bool operator!=(const Worker& lhs, const Worker& rhs) noexcept {
+                return not(lhs == rhs);
+            }
+
+            helpers::Thread handle_;
     };
 } // namespace web_server::threads
 

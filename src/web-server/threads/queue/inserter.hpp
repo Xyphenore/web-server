@@ -1,34 +1,74 @@
 #ifndef THREADS_QUEUE_INSERTER_HPP
 #define THREADS_QUEUE_INSERTER_HPP
 
-#include <memory>
+#include "extractor.hpp"
 
-#include "queue.hpp"
+#include <web-server/helpers/errors.hpp>
+
+#include <memory>
+#include <utility>
 
 namespace web_server::threads::queue {
     template <typename T>
-    class QueueInserter final {
+    class [[nodiscard]] QueueInserter final {
         public:
-            QueueInserter() = delete;
+            using QueueExtractor = QueueExtractor<T>;
+            using Queue = typename QueueExtractor::Queue;
 
-            explicit QueueInserter(std::shared_ptr<Queue<T>> queue) :
-                queue_{std::move(queue)} {
-                if (nullptr == queue_) {
-                    throw errors::InvalidQueuePointerError{};
-                }
-            }
+            QueueInserter() noexcept = default;
 
-            void push(T element) {
-                queue_->push(std::move(element));
-            }
+            QueueInserter(const QueueInserter&) noexcept = delete;
+            QueueInserter(QueueInserter&&) noexcept = default;
 
-            void close() {
-                queue_->close();
-            }
+            QueueInserter& operator=(const QueueInserter&) noexcept = delete;
+            QueueInserter& operator=(QueueInserter&&) noexcept = default;
+
+            ~QueueInserter() noexcept;
+
+            void push(T element) noexcept;
+
+            QueueExtractor make_extractor() noexcept;
 
         private:
-            std::shared_ptr<Queue<T>> queue_;
+            friend void swap(QueueInserter& lhs, QueueInserter& rhs) noexcept { std::swap(lhs.queue_, rhs.queue_); }
+
+            [[nodiscard]] friend bool operator==(const QueueInserter& lhs, const QueueInserter& rhs) noexcept {
+                return lhs.queue_ == rhs.queue_;
+            }
+
+            [[nodiscard]] friend bool operator!=(const QueueInserter& lhs, const QueueInserter& rhs) noexcept {
+                return not(lhs == rhs);
+            }
+
+            typename QueueExtractor::QueuePointer queue_{std::make_shared<Queue>()};
     };
+} // namespace web_server::threads::queue
+
+namespace web_server::threads::queue {
+    template <typename T>
+    void QueueInserter<T>::push(T element) noexcept {
+        if (nullptr == queue_) {
+            helpers::panic_due_to_a_logic_error("Queue pointer is null. You use a moved inserter.");
+        }
+
+        queue_->push(std::move(element));
+    }
+
+    template <typename T>
+    typename QueueInserter<T>::QueueExtractor QueueInserter<T>::make_extractor() noexcept {
+        if (nullptr == queue_) {
+            helpers::panic_due_to_a_logic_error("Queue pointer is null. You use a moved inserter.");
+        }
+
+        return QueueExtractor{queue_};
+    }
+
+    template <typename T>
+    QueueInserter<T>::~QueueInserter() noexcept {
+        if (nullptr != queue_) {
+            queue_->close();
+        }
+    }
 } // namespace web_server::threads::queue
 
 #endif // THREADS_QUEUE_INSERTER_HPP

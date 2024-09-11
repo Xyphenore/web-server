@@ -1,25 +1,17 @@
 #ifndef THREADS_POOL_HPP
 #define THREADS_POOL_HPP
 
+#include "queue/inserter.hpp"
+#include "worker.hpp"
+
+#include <array>
 #include <cstddef>
-#include <vector>
-#include <stdexcept>
 #include <utility>
 
-#include <web-server/requests/job.hpp>
-#include <web-server/tools.hpp>
-#include "worker.hpp"
-#include "queue/creator.hpp"
-#include "queue/inserter.hpp"
-
 namespace web_server::threads {
-    namespace errors {
-        class InvalidWorkerAmountError final: public std::invalid_argument {
-            public:
-                InvalidWorkerAmountError() noexcept:
-                    std::invalid_argument{"The worker amount is zero."} {}
-        };
-    } // namespace errors
+    using WorkerAmount = std::size_t;
+
+    constexpr WorkerAmount DEFAULT_AMOUNT{1};
 
     /// A pool of workers to execute multiple [`Job`]s in parallel.
     ///
@@ -43,10 +35,14 @@ namespace web_server::threads {
     /// <!-- References -->
     ///
     /// [WorkerPool]: WorkerPool
-    class WorkerPool final {
+    template <WorkerAmount amount = DEFAULT_AMOUNT>
+    class [[nodiscard]] WorkerPool final {
+            static constexpr WorkerAmount MIN_AMOUNT{1};
+
+            static_assert(MIN_AMOUNT <= amount, "The given value is '0'. Please give an integer greater than 0.");
+
         public:
-            WorkerPool() :
-                WorkerPool{DEFAULT_AMOUNT, queue::make_queue<requests::Job>()} {}
+            using Job = Worker::Job;
 
             /// Create a new WorkerPool.
             ///
@@ -61,41 +57,7 @@ namespace web_server::threads {
             /// # Panics
             ///
             /// - If the size is zero.
-            explicit WorkerPool(const tools::NonZeroSizeT amount_workers):
-                WorkerPool{
-                    static_cast<std::size_t>(amount_workers),
-                    queue::make_queue<requests::Job>()
-                } {}
-
-            WorkerPool(const WorkerPool& other) = delete;
-
-            WorkerPool(WorkerPool&& other) noexcept:
-                workers_{std::move(other.workers_)}, queue_{std::move(other.queue_)} {}
-
-            ~WorkerPool() noexcept {
-                try {
-                    queue_.close();
-                }
-                catch (const queue::errors::QueueClosedException&) {
-                    // Do nothing if the queue is already closed.
-                }
-
-                while (!workers_.empty()) {
-                    workers_.back().join();
-                    workers_.pop_back();
-                }
-            }
-
-            WorkerPool& operator=(const WorkerPool& other) = delete;
-
-            WorkerPool& operator=(WorkerPool&& other) noexcept {
-                if (this != &other) {
-                    this->queue_ = std::move(other.queue_);
-                    this->workers_ = std::move(other.workers_);
-                }
-
-                return *this;
-            }
+            constexpr WorkerPool() noexcept;
 
             /// Execute a [`Job`] in any worker.
             ///
@@ -113,46 +75,39 @@ namespace web_server::threads {
             /// # Panics
             ///
             /// - If the pool is used during its drop.
-            void execute(requests::Job job) noexcept {
-                queue_.push(std::move(job));
-            }
-
-            void close() {
-                try {
-                    queue_.close();
-                }
-                catch (const queue::errors::QueueClosedException&) {
-                    // Do nothing if the queue is already closed.
-                }
-
-                while (!workers_.empty()) {
-                    workers_.back().join();
-                    workers_.pop_back();
-                }
-            }
+            void execute(Job&& job) noexcept;
 
         private:
-            constexpr static auto DEFAULT_AMOUNT = static_cast<std::size_t>(1);
+            using QueueInserter = queue::QueueInserter<Job>;
+            using QueueExtractor = Worker::QueueExtractor;
 
-            WorkerPool(
-                const std::size_t amount,
-                const std::pair<queue::QueueInserter<requests::Job>, queue::QueueExtractor<requests::Job>>& parts
-                ):
-                queue_{parts.first} {
-                if (static_cast<std::size_t>(0) == amount) {
-                    throw errors::InvalidWorkerAmountError{};
-                }
+            using WorkerID = Worker::ID;
 
-                workers_.reserve(amount);
+            template <WorkerID... ids>
+            using WorkerIDs = std::integer_sequence<WorkerID, ids...>;
 
-                for (auto id = static_cast<std::size_t>(0); id < amount; ++id) {
-                    std::ignore = workers_.emplace_back(std::size_t{id}, parts.second);
-                }
-            }
+            template <WorkerID... ids>
+            constexpr explicit WorkerPool(QueueInserter queue, WorkerIDs<ids...> ids_) noexcept;
 
-            std::vector<Worker> workers_{};
-            queue::QueueInserter<requests::Job> queue_;
+            std::array<Worker, amount> workers_;
+            QueueInserter queue_;
     };
+} // namespace web_server::threads
+
+namespace web_server::threads {
+    template <WorkerAmount amount>
+    WorkerPool<amount>::WorkerPool() noexcept:
+    WorkerPool{QueueInserter{}, std::make_integer_sequence<WorkerID, amount>{}} {}
+
+    template <WorkerAmount amount>
+    void WorkerPool<amount>::execute(Job&& job) noexcept {
+        queue_.push(std::move(job));
+    }
+
+    template <WorkerAmount amount>
+    template <WorkerPool<>::WorkerID... ids>
+    WorkerPool<amount>::WorkerPool(QueueInserter queue, [[maybe_unused]] WorkerIDs<ids...> ids_) noexcept:
+    workers_{Worker{ids, queue.make_extractor()}...}, queue_{std::move(queue)} {}
 } // namespace web_server::threads
 
 #endif // THREADS_POOL_HPP

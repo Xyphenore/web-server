@@ -1,153 +1,99 @@
-#ifndef THREADS_QUEUE_HPP
-#define THREADS_QUEUE_HPP
+#ifndef THREADS_QUEUE_QUEUE_HPP
+#define THREADS_QUEUE_QUEUE_HPP
+
+#include <web-server/helpers/errors.hpp>
 
 #include <condition_variable>
-#include <mutex>
 #include <list>
+#include <mutex>
 #include <stdexcept>
-#include <string>
-
+#include <type_traits>
+#include <utility>
 
 namespace web_server::threads::queue {
     namespace errors {
-        enum class TriedOperations: uint8_t {
-            CLOSE,
-            POP,
-            PUSH,
-        };
-
-        class InvalidTriedOperationError final: public std::domain_error {
+        class [[nodiscard]] QueueClosedException final: public std::runtime_error {
             public:
-                InvalidTriedOperationError() noexcept:
-                    std::domain_error{"Invalid TriedOperations value."} {}
-        };
-
-        class QueueClosedException final: public std::runtime_error {
-            public:
-                explicit QueueClosedException(const TriedOperations operation) noexcept :
-                    std::runtime_error{
-                        "Cannot do the operation '"
-                        + (format(operation) += "', the queue is already closed.")
-                    } {}
-
-            private:
-                [[nodiscard]] static std::string format(const TriedOperations operation) {
-                    std::string value{};
-
-                    switch (operation) {
-                        case TriedOperations::POP: value = "POP";
-                            break;
-                        case TriedOperations::PUSH: value = "PUSH";
-                            break;
-                        case TriedOperations::CLOSE: value = "CLOSE";
-                            break;
-                        default: break;
-                    }
-
-                    if (value.empty()) {
-                        throw errors::InvalidTriedOperationError{};
-                    }
-
-                    return value;
-                }
-        };
-
-        class InvalidQueuePointerError final: public std::invalid_argument {
-            public:
-                InvalidQueuePointerError() noexcept :
-                    std::invalid_argument{"Queue pointer is null."} {}
+                QueueClosedException() noexcept;
         };
     } // namespace errors
 
     template <typename T>
-    class Queue final {
+    class [[nodiscard]] Queue final {
+            static_assert(std::is_destructible_v<T>, "T must be Erasable.");
+            static_assert(std::is_move_constructible_v<T> and std::is_move_assignable_v<T>, "T must be MoveInsertable");
+
         public:
-            void close() {
-                {
-                    const std::lock_guard lk{mutex_};
+            Queue() noexcept = default;
 
-                    if (closed_) {
-                        throw errors::QueueClosedException{errors::TriedOperations::CLOSE};
-                    }
-                    closed_ = true;
-                }
+            void close() noexcept;
 
-                elements_cv_.notify_all();
-            }
+            void push(T element) noexcept;
 
-            void push(T element) {
-                {
-                    const std::lock_guard lk{mutex_};
-
-                    if (closed_) {
-                        throw errors::QueueClosedException{errors::TriedOperations::PUSH};
-                    }
-
-                    elements_.push_back(std::move(element));
-                }
-
-                elements_cv_.notify_one();
-            }
-
-            [[nodiscard]] T pop() {
-                {
-                    const std::lock_guard lk{mutex_};
-
-                    if (!elements_.empty()) {
-                        T element{std::move(elements_.front())};
-                        elements_.pop_front();
-
-                        return element;
-                    }
-
-                    if (closed_) {
-                        throw errors::QueueClosedException{errors::TriedOperations::POP};
-                    }
-                }
-
-                std::unique_lock lk{mutex_};
-                elements_cv_.wait(lk, [this] { return this->check_has_an_element(); });
-
-                T element{std::move(elements_.front())};
-                elements_.pop_front();
-
-                return element;
-            }
-
-            [[nodiscard]] bool is_closed() const noexcept {
-                const std::lock_guard lk{mutex_};
-                return closed_;
-            }
+            [[nodiscard]] T pop();
 
         private:
-            /**
-             * Check if an element is available, and returns True if it is the case.
-             *
-             * If no element is available, throws [`QueueClosedException`] if the queue is closed.
-             *
-             * @warning The mutex must be locked before calling this function.
-             * @warning This function must be used with [`std::condition_variable::wait`].
-             *
-             * @return bool - True if an element is available.
-             */
-            [[nodiscard]] bool check_has_an_element() {
-                if (!elements_.empty()) {
-                    return true;
-                }
-
-                if (closed_) {
-                    throw errors::QueueClosedException{errors::TriedOperations::POP};
-                }
-
-                return false;
-            }
+            mutable std::mutex mutex_;
+            mutable std::condition_variable elements_cv_;
 
             std::list<T> elements_{};
-            bool closed_ = false;
-
-            std::mutex mutex_{};
-            std::condition_variable elements_cv_{};
+            bool is_closed_{false};
     };
 } // namespace web_server::threads::queue
 
-#endif // THREADS_QUEUE_HPP
+namespace web_server::threads::queue {
+    namespace errors {
+        inline QueueClosedException::QueueClosedException() noexcept:
+        std::runtime_error{"Cannot do the operation 'POP', the queue is already closed."} {}
+    } // namespace errors
+
+    template <typename T>
+    void Queue<T>::close() noexcept {
+        {
+            const std::lock_guard lk{mutex_};
+
+            if (is_closed_) {
+                helpers::panic_due_to_a_logic_error("Cannot do the operation 'CLOSE', the queue is already closed.");
+            }
+            is_closed_ = true;
+        }
+
+        elements_cv_.notify_all();
+    }
+
+    template <typename T>
+    void Queue<T>::push(T element) noexcept {
+        {
+            const std::lock_guard lk{mutex_};
+
+            if (is_closed_) {
+                helpers::panic_due_to_a_logic_error("Cannot do the operation 'PUSH', the queue is already closed.");
+            }
+
+            elements_.push_back(std::move(element));
+        }
+
+        elements_cv_.notify_one();
+    }
+
+    template <typename T>
+    T Queue<T>::pop() {
+        std::unique_lock lk{mutex_};
+        elements_cv_.wait(lk, [this] { return (this->is_closed_) or (not this->elements_.empty()); });
+
+        if (not elements_.empty()) {
+            T element{std::move(elements_.front())};
+            elements_.pop_front();
+
+            return element;
+        }
+
+        if (is_closed_) {
+            throw errors::QueueClosedException{};
+        }
+
+        helpers::panic_due_to_a_logic_error("Queue is empty, it is not possible to pop an element.");
+    }
+} // namespace web_server::threads::queue
+
+#endif // THREADS_QUEUE_QUEUE_HPP
