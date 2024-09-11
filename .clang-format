@@ -40,12 +40,28 @@ BreakConstructorInitializersBeforeComma: false
 ConstructorInitializerAllOnOneLineOrOnePerLine: false
 ColumnLimit: 120
 IncludeCategories:
-  - Regex: '^<.*'
-    Priority: 1
-  - Regex: '^".*'
+  - Regex: '^<web-server\/.+>$'
+    Priority: 20
+  - Regex: '^"web-server\/.+"$'
+    Priority: 20
+  - Regex: '^<asio\/.+>$'
+    Priority: 150
+  - Regex: '^<fmt\/.+>$'
+    Priority: 151
+  - Regex: '^"requests\/.+"$'
+    Priority: 3
+  - Regex: '^"routes\/.+"$'
+    Priority: 4
+  - Regex: '^"server\/.+"$'
+    Priority: 5
+  - Regex: '^"threads\/.+"$'
+    Priority: 6
+  - Regex: '^<[[:alnum:]_]+>$'
+    Priority: 255
+  - Regex: '^".+"$'
     Priority: 2
   - Regex: '.*'
-    Priority: 3
+    Priority: 1
 IncludeIsMainRegex: '([-_](test|unittest))?$'
 IndentAccessModifiers: true
 IndentCaseLabels: true
