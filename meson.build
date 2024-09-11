@@ -1,5 +1,6 @@
 project(
-    'web-server', 'cpp',
+    'web-server',
+    'cpp',
     license : 'LGPL-3.0-or-later',
     license_files : 'LICENSE.md',
     meson_version : '>=1.4.0',
@@ -131,7 +132,9 @@ if get_option('debug')
             'RTTI' : get_option('cpp_rtti'),
             'ThreadSafe statics' : get_option('gcc_threadsafe_statics'),
             'Use CXA atexit' : get_option('gcc_cxa_atexit'),
-            'Visibility inlines hidden' : get_option('gcc_visibility_inlines_hidden'),
+            'Visibility inlines hidden' : get_option(
+                'gcc_visibility_inlines_hidden',
+            ),
             'Use GNU symbols and keywords' : get_option('gcc_gnu_keywords'),
         }
 
@@ -212,7 +215,11 @@ endif
 # -----------
 
 message('Building the library \'asio\'...')
-asio_dep = dependency('asio', version : ['>=1.30.2', '<2.0.0'], allow_fallback : true)
+asio_dep = dependency(
+    'asio',
+    version : ['>=1.30.2', '<2.0.0'],
+    allow_fallback : true,
+)
 message('The library \'asio\' (' + asio_dep.version() + ') is built.')
 
 message('Building the library \'fmt\'...')
