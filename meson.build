@@ -215,6 +215,16 @@ message('Building the library \'asio\'...')
 asio_dep = dependency('asio', version : ['>=1.30.2', '<2.0.0'], allow_fallback : true)
 message('The library \'asio\' (' + asio_dep.version() + ') is built.')
 
+message('Building the library \'fmt\'...')
+fmt_dep = dependency(
+    'fmt',
+    version : ['>=11.0.1', '<12.0.0'],
+    allow_fallback : true,
+    # Cannot link the executable to shared libfmt on Windows, so make it static to solve the issue.
+    static : host_machine.system() == 'windows',
+)
+message('The library \'fmt\' (' + fmt_dep.version() + ') is built.')
+
 message('Building the executable...')
 
 web_server_src = files('src' / meson.project_name() / 'main.cpp')
