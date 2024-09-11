@@ -95,13 +95,21 @@ if get_option('debug')
     gnu_symbols = 'default'
 
     extra_flags = [
-        '-Wall', '-Wextra', '-Wpedantic', '-Weffc++',
+        # Already given by meson: '-Wall',
+        '-Wextra',
+        '-Wpedantic',
+        '-Weffc++',
         '-fstrict-enums',
-        '-Wctor-dtor-privacy', '-Wnon-virtual-dtor',
-        '-Wold-style-cast', '-Woverloaded-virtual',
-        '-Wmismatched-tags', '-Wmismatched-new-delete',
-        '-Wzero-as-null-pointer-constant', '-Wextra-semi',
-        '-Wsuggest-override', '-Wdouble-promotion',
+        '-Wctor-dtor-privacy',
+        '-Wnon-virtual-dtor',
+        '-Wold-style-cast',
+        '-Woverloaded-virtual',
+        '-Wmismatched-tags',
+        '-Wmismatched-new-delete',
+        '-Wzero-as-null-pointer-constant',
+        '-Wextra-semi',
+        '-Wsuggest-override',
+        '-Wdouble-promotion',
     ]
 
     if compiler.get_id() == 'gcc'
