@@ -22,7 +22,7 @@ namespace web_server::helpers {
             value.begin(),
             value.end(),
             upper_value.begin(),
-            [&locale](const char c) { return std::toupper(c, locale); });
+            [&locale](const std::string::value_type c) { return std::toupper(c, locale); });
 
         return upper_value;
     }
@@ -36,7 +36,9 @@ namespace web_server::helpers {
 #endif // __cpp_lib_execution
             value.begin(),
             value.end(),
-            [&locale](const char ch) { return std::isblank(ch, locale) or std::isspace(ch, locale); });
+            [&locale](const fmt::string_view::value_type ch) {
+                return std::isblank(ch, locale) or std::isspace(ch, locale);
+            });
 
         return last_left_blank_char == value.end();
     }
