@@ -40,6 +40,6 @@ namespace web_server::helpers {
                 return std::isblank(ch, locale) or std::isspace(ch, locale);
             });
 
-        return last_left_blank_char == value.end();
+        return value.end() == last_left_blank_char;
     }
 } // namespace web_server::helpers
