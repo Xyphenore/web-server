@@ -12,11 +12,11 @@ namespace web_server::routes::not_found {
     using requests::Request;
     using requests::Response;
     using requests::Status;
-    using tools::TEMPLATES_DIRECTORY;
+    using tools::templates_directory;
 
     Response handler(Request request) {
         auto response = Response::from(std::move(request), Status::NotFound);
-        response.add_file(TEMPLATES_DIRECTORY / "not_found.html");
+        response.add_file(templates_directory() / "not_found.html");
 
         return response;
     }

@@ -4,7 +4,10 @@
 #include <filesystem>
 
 namespace web_server::routes::tools {
-    static inline const std::filesystem::path TEMPLATES_DIRECTORY{"@TEMPLATES_DIRECTORY@"};
+    inline std::filesystem::path templates_directory() noexcept {
+        static const std::filesystem::path TEMPLATES_DIRECTORY{"@TEMPLATES_DIRECTORY@"};
+        return TEMPLATES_DIRECTORY;
+    }
 } // namespace web_server::routes::tools
 
 #endif // ROUTES_TEMPLATES_DIRECTORY_HPP

@@ -18,11 +18,11 @@ namespace web_server::routes::slow_request {
     using requests::Request;
     using requests::Response;
     using requests::Status;
-    using tools::TEMPLATES_DIRECTORY;
+    using tools::templates_directory;
 
     Response get(Request request) {
         auto response = Response::from(std::move(request), Status::Ok);
-        response.add_file(TEMPLATES_DIRECTORY / "slow_request.html");
+        response.add_file(templates_directory() / "slow_request.html");
 
         std::this_thread::sleep_for(SLEEP_TIME);
 

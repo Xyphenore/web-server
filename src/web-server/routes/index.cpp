@@ -12,11 +12,11 @@ namespace web_server::routes::index {
     using requests::Request;
     using requests::Response;
     using requests::Status;
-    using tools::TEMPLATES_DIRECTORY;
+    using tools::templates_directory;
 
     Response get(Request request) {
         auto response = Response::from(std::move(request), Status::Ok);
-        response.add_file(TEMPLATES_DIRECTORY / "index.html");
+        response.add_file(templates_directory() / "index.html");
 
         return response;
     }
