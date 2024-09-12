@@ -9,9 +9,11 @@
 
 namespace web_server::server {
     void HTTPHandlers::link(Method method, Handler handler) noexcept {
+        auto copied_method = method;
+
         if (const auto [_, inserted] = handlers_.try_emplace(std::move(method), std::move(handler)); not inserted) {
             helpers::panic_due_to_logic_error(
-                fmt::format(FMT_STRING("The method {} has already a listener registered."), method));
+                fmt::format(FMT_STRING("The method {} has already a listener registered."), std::move(copied_method)));
         }
     }
 

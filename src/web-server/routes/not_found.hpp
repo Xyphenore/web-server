@@ -17,6 +17,6 @@ namespace web_server::routes::not_found {
     ///
     /// - If [`Response::add_file()`] returns an error.
     requests::Response handler(requests::Request request);
-} // namespace web_server::routes
+} // namespace web_server::routes::not_found
 
 #endif // ROUTES_NOT_FOUND_HPP

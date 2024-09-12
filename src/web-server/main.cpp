@@ -49,6 +49,7 @@ int main() {
     }
     catch (...) {
         // Ensure destructors are called.
+        fmt::println(std::cerr, FMT_STRING("Critical error: unknown error."));
         throw;
     }
 

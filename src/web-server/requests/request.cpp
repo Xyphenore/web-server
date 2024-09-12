@@ -3,7 +3,7 @@
 #include "errors.hpp"
 #include "status.hpp"
 
-// Need to load the formatter of asio::ip::address
+// Load the formatter of asio::ip::address
 // ReSharper disable once CppUnusedIncludeDirective
 #include <web-server/helpers/compat.hpp>
 #include <web-server/helpers/sockets.hpp>
@@ -31,25 +31,34 @@ namespace {
     using Verb = Method::Verb;
     using TCPStream = Request::Stream;
 
-    const std::regex FIRST_LINE_REGEX{
-        fmt::format(
-            FMT_STRING("^({}) ({}) (HTTP/(?:1.1|(?:[1-3](?:.0)?)))\r\n"),
-            fmt::join(
-                {
-                    Verb::Get,
-                    Verb::Post,
-                    Verb::Update,
-                    Verb::Patch,
-                    Verb::Delete,
-                    Verb::Head,
-                    Verb::Options,
-                    Verb::Trace,
-                    Verb::Connect,
-                },
-                "|"),
-            Method::URI::REGEX_STRING),
-        std::regex::ECMAScript | std::regex::icase | std::regex::optimize,
-    };
+    using StringMatchSize = std::smatch::size_type;
+
+    constexpr StringMatchSize VERB_INDEX{1};
+    constexpr StringMatchSize URI_INDEX{2};
+    constexpr StringMatchSize VERSION_INDEX{3};
+
+    std::regex first_line_regex() {
+        static const std::regex FIRST_LINE_REGEX{
+            fmt::format(
+                FMT_STRING("^({}) ({}) (HTTP/(?:1.1|(?:[1-3](?:.0)?)))\r\n"),
+                fmt::join(
+                    {
+                        Verb::Get,
+                        Verb::Post,
+                        Verb::Update,
+                        Verb::Patch,
+                        Verb::Delete,
+                        Verb::Head,
+                        Verb::Options,
+                        Verb::Trace,
+                        Verb::Connect,
+                    },
+                    "|"),
+                Method::URI::REGEX_STRING),
+            std::regex::ECMAScript | std::regex::icase | std::regex::optimize,
+        };
+        return FIRST_LINE_REGEX;
+    }
 
     [[nodiscard]] std::string read(TCPStream& stream) {
         std::string content{};
@@ -57,11 +66,11 @@ namespace {
         if (const auto read_size = asio::read_until(stream, asio::dynamic_buffer(content), "\r\n");
             content.max_size() <= read_size) {
             std::smatch match{};
-            if (const auto matched = std::regex_search(content, match, ::FIRST_LINE_REGEX); not matched) {
+            if (const auto matched = std::regex_search(content, match, ::first_line_regex()); not matched) {
                 throw InvalidHTTPRequestError{content};
             }
 
-            auto version = match.str(3);
+            auto version = match.str(::VERSION_INDEX);
 
             const auto error_response = fmt::format(FMT_STRING("{} {}\r\n\r\n"), version, Status::UnprocessableContent);
 
@@ -97,22 +106,16 @@ namespace web_server::requests {
     } // namespace errors
 
     Request Request::from(Stream&& stream) {
-        using StringMatchSize = std::smatch::size_type;
-
-        static constexpr StringMatchSize VERB_INDEX{1};
-        static constexpr StringMatchSize URI_INDEX{2};
-        static constexpr StringMatchSize VERSION_INDEX{3};
-
         const auto content = read(stream);
 
         std::smatch match{};
-        if (const auto matched = std::regex_search(content, match, ::FIRST_LINE_REGEX); not matched) {
+        if (const auto matched = std::regex_search(content, match, ::first_line_regex()); not matched) {
             throw errors::InvalidHTTPRequestError{content};
         }
 
         return Request{
-            Method{to_verb(match.str(VERB_INDEX)), to_uri(match.str(URI_INDEX))},
-            to_version(match.str(VERSION_INDEX)),
+            Method{to_verb(match.str(::VERB_INDEX)), to_uri(match.str(::URI_INDEX))},
+            to_version(match.str(::VERSION_INDEX)),
             std::move(stream),
         };
     }

@@ -26,7 +26,7 @@ namespace web_server::requests {
             struct [[nodiscard]] HasStringConstructor final {
                 private:
                     template <typename U>
-                    static auto test(std::int32_t) -> decltype(U(std::string{}), std::true_type{});
+                    static auto test(std::int32_t _) -> decltype(U(std::string{}), std::true_type{});
                     template <typename>
                     static std::false_type test(...);
 
@@ -400,21 +400,43 @@ namespace web_server::requests {
     Method::URI to_uri(std::string_view uri);
 } // namespace web_server::requests
 
-template <>
-struct std::hash<web_server::requests::Method> {
-        std::size_t operator()(const web_server::requests::Method& method) const noexcept {
-            return std::hash<std::string>{}(method.value_);
-        }
-};
+namespace std {
+    template <>
+    struct hash<web_server::requests::Method> {
+            size_t operator()(const web_server::requests::Method& method) const noexcept {
+                return hash<string>{}(method.value_);
+            }
+    };
 
-template <>
-struct fmt::formatter<web_server::requests::Method>: public fmt::ostream_formatter {};
+    template <>
+    struct hash<web_server::requests::Method::URI> final {
+            size_t operator()(const web_server::requests::Method::URI& uri) const noexcept {
+                return hash<string>{}(uri.value_);
+            }
+    };
 
-template <>
-struct fmt::formatter<web_server::requests::Method::Verb>: public fmt::ostream_formatter {};
+    template <>
+    struct hash<web_server::requests::Method::Verb> final {
+            size_t operator()(const web_server::requests::Method::Verb verb) const noexcept {
+                return hash<underlying_type_t<web_server::requests::Method::Verb>>{}(fmt::enums::format_as(verb));
+            }
+    };
+} // namespace std
 
-template <>
-struct fmt::formatter<web_server::requests::Method::URI>: public fmt::ostream_formatter {};
+namespace fmt {
+    template <>
+    struct formatter<web_server::requests::Method>: public ostream_formatter {};
+
+    template <>
+    struct formatter<web_server::requests::Method::Verb>: public ostream_formatter {};
+
+    template <>
+    struct formatter<web_server::requests::Method::URI>: public ostream_formatter {};
+
+    template <>
+    struct formatter<web_server::requests::errors::ElementTypes>: public ostream_formatter {};
+
+} // namespace fmt
 
 namespace web_server::requests {
     namespace errors {
@@ -470,20 +492,4 @@ namespace web_server::requests {
     inline Method Method::Connect(const std::string_view uri) { return Method::Connect(URI{uri}); }
 } // namespace web_server::requests
 
-template <>
-struct fmt::formatter<web_server::requests::errors::ElementTypes>: public fmt::ostream_formatter {};
-
-template <>
-struct std::hash<web_server::requests::Method::URI> final {
-        std::size_t operator()(const web_server::requests::Method::URI& uri) const noexcept {
-            return std::hash<std::string>{}(uri.value_);
-        }
-};
-
-template <>
-struct std::hash<web_server::requests::Method::Verb> final {
-        std::size_t operator()(const web_server::requests::Method::Verb verb) const noexcept {
-            return std::hash<std::underlying_type_t<web_server::requests::Method::Verb>>{}(fmt::enums::format_as(verb));
-        }
-};
 #endif // REQUESTS_METHOD_HPP

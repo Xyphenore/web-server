@@ -35,11 +35,11 @@ namespace web_server::threads {
     /// <!-- References -->
     ///
     /// [WorkerPool]: WorkerPool
-    template <WorkerAmount amount = DEFAULT_AMOUNT>
+    template <WorkerAmount Amount = DEFAULT_AMOUNT>
     class [[nodiscard]] WorkerPool final {
             static constexpr WorkerAmount MIN_AMOUNT{1};
 
-            static_assert(MIN_AMOUNT <= amount, "The given value is '0'. Please give an integer greater than 0.");
+            static_assert(MIN_AMOUNT <= Amount, "The given value is '0'. Give an integer greater than 0.");
 
         public:
             using Job = Worker::Job;
@@ -89,7 +89,7 @@ namespace web_server::threads {
             template <WorkerID... ids>
             explicit WorkerPool(QueueInserter queue, WorkerIDs<ids...> ids_) noexcept;
 
-            std::array<Worker, amount> workers_;
+            std::array<Worker, Amount> workers_;
             QueueInserter queue_;
     };
 } // namespace web_server::threads

@@ -7,15 +7,13 @@
 #include <tuple>
 
 namespace web_server::server {
-    // Dev note: constructor and destructor must be cpp file instead of hpp file
-    // even if their size is small, because asio::io_context::executor_type is known only
-    // at execution time and make a compilation error.
+    // Developer note.
+    // Constructor and destructor must be in cpp file instead of hpp file even if their size is small,
+    // because asio::io_context::executor_type is known only at execution time and make a compilation error.
     // For more explanations, check the note in the private section of the IOContext class in the hpp file.
 
     IOContext::IOContext():
     bg_task_{[this] {
-        // Add a ghost work to the executor in the thread function, because the thread starts directly after it is
-        // built.
         this->executor_.on_work_started();
         std::ignore = this->io_context_.run();
     }} {}

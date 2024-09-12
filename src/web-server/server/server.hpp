@@ -83,7 +83,7 @@ namespace web_server::server {
     ///
     /// server.serve();
     /// ```
-    template <threads::WorkerAmount amount = threads::DEFAULT_AMOUNT, Debug debug = DEFAULT_DEBUG>
+    template <threads::WorkerAmount Amount = threads::DEFAULT_AMOUNT, Debug Debug_ = DEFAULT_DEBUG>
     class WebServer final {
         public:
             using Method = HTTPHandlers::Method;
@@ -180,15 +180,17 @@ namespace web_server::server {
 
         private:
             using Address = IOContext::Address;
+            using Port = helpers::Port;
+
             using BlockingMode = IOContext::BlockingMode;
 
-            using WorkerPool = threads::WorkerPool<amount>;
+            using WorkerPool = threads::WorkerPool<Amount>;
 
             using Job = typename WorkerPool::Job;
             using Request = typename Job::Request;
             using Stream = typename Request::Stream;
 
-            static constexpr auto HTTP_PORT{8000};
+            static constexpr Port HTTP_PORT{8000};
 
             /// Process the incoming [`TcpStream`].
             ///
@@ -205,7 +207,7 @@ namespace web_server::server {
             HTTPHandlers handlers_;
 
             std::size_t cpt_{0};
-            bool debug_{debug == Debug::On};
+            bool debug_{Debug_ == Debug::On};
 
             IOContext io_context_;
             RunningState is_running_{io_context_};
@@ -225,9 +227,9 @@ namespace web_server {
 } // namespace web_server
 
 namespace web_server::server {
-    template <WorkerAmount amount, Debug debug>
-    typename WebServer<amount, debug>::ExitCode WebServer<amount, debug>::serve() {
-        auto listener = io_context_.listen(Address{asio::ip::tcp::v4(), HTTP_PORT}, BlockingMode::Off);
+    template <WorkerAmount Amount, Debug Debug_>
+    typename WebServer<Amount, Debug_>::ExitCode WebServer<Amount, Debug_>::serve() {
+        auto listener = io_context_.listen(Address{asio::ip::tcp::v4(), WebServer::HTTP_PORT}, BlockingMode::Off);
 
         is_running_ = true;
 

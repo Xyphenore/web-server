@@ -10,6 +10,7 @@ namespace web_server::helpers {
 
     using LocalEndPoint = asio::ip::tcp::endpoint;
     using RemoteAddress = asio::ip::address;
+    using Port = asio::ip::port_type;
 
     using Socket = asio::ip::tcp::socket;
     using TCPStream = Socket;

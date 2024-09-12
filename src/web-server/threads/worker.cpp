@@ -9,7 +9,7 @@
 namespace web_server::threads {
     Worker::Worker(const ID id, QueueExtractor queue) noexcept:
     handle_{
-        [id](QueueExtractor queue_) {
+        [id](QueueExtractor queue_) noexcept {
             while (true) {
                 try {
                     queue_.pop().execute().send();

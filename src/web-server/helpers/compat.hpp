@@ -6,10 +6,12 @@
 #include <fmt/base.h>
 #include <fmt/ostream.h>
 
-template <>
-struct fmt::formatter<web_server::helpers::RemoteAddress> final: public fmt::ostream_formatter {};
+namespace fmt {
+    template <>
+    struct formatter<web_server::helpers::RemoteAddress> final: public ostream_formatter {};
 
-template <>
-struct fmt::formatter<web_server::helpers::LocalEndPoint> final: public fmt::ostream_formatter {};
+    template <>
+    struct formatter<web_server::helpers::LocalEndPoint> final: public ostream_formatter {};
+} // namespace fmt
 
 #endif // HELPERS_COMPAT_HPP
