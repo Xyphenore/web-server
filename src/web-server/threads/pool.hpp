@@ -57,7 +57,7 @@ namespace web_server::threads {
             /// # Panics
             ///
             /// - If the size is zero.
-            constexpr WorkerPool() noexcept;
+            WorkerPool() noexcept;
 
             /// Execute a [`Job`] in any worker.
             ///
