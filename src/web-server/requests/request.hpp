@@ -15,7 +15,7 @@ namespace web_server::requests {
             public:
                 using Address = helpers::RemoteAddress;
 
-                explicit ReceiveTooBigMessageError(const Address& client_address);
+                explicit ReceiveTooBigMessageError(const Address& client_address) noexcept;
         };
 
         class [[nodiscard]] InvalidHTTPRequestError final: public std::invalid_argument {

@@ -92,7 +92,7 @@ namespace {
 
 namespace web_server::requests {
     namespace errors {
-        ReceiveTooBigMessageError::ReceiveTooBigMessageError(const Address& client_address):
+        ReceiveTooBigMessageError::ReceiveTooBigMessageError(const Address& client_address) noexcept:
         std::length_error{
             fmt::format(FMT_STRING("Error: the request received from the client ({}) is too big."), client_address),
         } {}
