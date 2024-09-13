@@ -48,6 +48,8 @@ IncludeCategories:
     Priority: 150
   - Regex: '^<fmt\/.+>$'
     Priority: 151
+  - Regex: '^<range\/v3\/.+>$'
+    Priority: 152
   - Regex: '^"requests\/.+"$'
     Priority: 3
   - Regex: '^"routes\/.+"$'

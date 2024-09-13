@@ -222,6 +222,14 @@ asio_dep = dependency(
 )
 message('The library \'asio\' (' + asio_dep.version() + ') is built.')
 
+message('Building the library \'range\'...')
+range_dep = dependency(
+    'range',
+    version : ['>=0.12.0', '<1.0.0'],
+    allow_fallback : true,
+)
+message('The library \'range\' (' + range_dep.version() + ') is built.')
+
 message('Building the library \'fmt\'...')
 fmt_dep = dependency(
     'fmt',
@@ -275,7 +283,7 @@ web_server_executable = executable(
     meson.project_name(),
     sources : web_server_src,
     extra_files : web_server_templates,
-    dependencies : [asio_dep, fmt_dep],
+    dependencies : [asio_dep, fmt_dep, range_dep],
     gnu_symbol_visibility : get_option('debug') ? gnu_symbols : 'default',
     cpp_args : extra_flags,
     implicit_include_directories : true,
