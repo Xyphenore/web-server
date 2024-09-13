@@ -4,7 +4,7 @@
 #include "request.hpp"
 #include "status.hpp"
 
-#include <web-server/helpers/sockets.hpp>
+#include <web-server/helpers/string.hpp>
 
 #include <filesystem>
 #include <string>
@@ -97,13 +97,15 @@ namespace web_server::requests {
             friend void swap(Response& lhs, Response& rhs) noexcept {
                 std::swap(lhs.status_, rhs.status_);
                 std::swap(lhs.version_, rhs.version_);
-                std::swap(lhs.contents_, rhs.contents_);
+                std::swap(lhs.content_, rhs.content_);
                 std::swap(lhs.stream_, rhs.stream_);
             }
 
+            [[nodiscard]] bool has_content() const noexcept;
+
             Status status_;
             Version version_;
-            std::string contents_;
+            std::string content_;
             Stream stream_;
     };
 } // namespace web_server::requests
@@ -119,6 +121,9 @@ namespace web_server::requests {
             request.take_stream(),
         };
     }
+
+    inline bool Response::has_content() const noexcept { return not helpers::is_blank(content_); }
+
 } // namespace web_server::requests
 
 #endif // REQUESTS_RESPONSE_HPP
