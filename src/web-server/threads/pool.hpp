@@ -86,8 +86,8 @@ namespace web_server::threads {
             template <WorkerID... ids>
             using WorkerIDs = std::integer_sequence<WorkerID, ids...>;
 
-            template <WorkerID... ids>
-            explicit WorkerPool(QueueInserter queue, WorkerIDs<ids...> ids_) noexcept;
+            template <WorkerID... IDs>
+            explicit WorkerPool(QueueInserter queue, WorkerIDs<IDs...> ids) noexcept;
 
             std::array<Worker, Amount> workers_;
             QueueInserter queue_;
@@ -95,19 +95,19 @@ namespace web_server::threads {
 } // namespace web_server::threads
 
 namespace web_server::threads {
-    template <WorkerAmount amount>
-    WorkerPool<amount>::WorkerPool() noexcept:
-    WorkerPool{QueueInserter{}, std::make_integer_sequence<WorkerID, amount>{}} {}
+    template <WorkerAmount Amount>
+    WorkerPool<Amount>::WorkerPool() noexcept:
+    WorkerPool{QueueInserter{}, std::make_integer_sequence<WorkerID, Amount>{}} {}
 
-    template <WorkerAmount amount>
-    void WorkerPool<amount>::execute(Job&& job) noexcept {
+    template <WorkerAmount Amount>
+    void WorkerPool<Amount>::execute(Job&& job) noexcept {
         queue_.push(std::move(job));
     }
 
-    template <WorkerAmount amount>
-    template <WorkerPool<>::WorkerID... ids>
-    WorkerPool<amount>::WorkerPool(QueueInserter queue, [[maybe_unused]] WorkerIDs<ids...> ids_) noexcept:
-    workers_{Worker{ids, queue.make_extractor()}...}, queue_{std::move(queue)} {}
+    template <WorkerAmount Amount>
+    template <WorkerPool<>::WorkerID... IDs>
+    WorkerPool<Amount>::WorkerPool(QueueInserter queue, [[maybe_unused]] WorkerIDs<IDs...> ids) noexcept:
+    workers_{Worker{IDs, queue.make_extractor()}...}, queue_{std::move(queue)} {}
 } // namespace web_server::threads
 
 #endif // THREADS_POOL_HPP
